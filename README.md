@@ -42,3 +42,4 @@ python manage.py startapp [app_name]
 
 
 
+# CommonsShare_AppStore
