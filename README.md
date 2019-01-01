@@ -4,7 +4,7 @@ To run locally, follow the steps:
 
 1) Clone the repository:
 
-git clone https://github.com/muralikarthikk/CommonsShare_AppStore.git
+git clone https://github.com/heliumdatacommons/CommonsShare_AppStore.git
 
 2) Navigate to the root directory:
 
