@@ -36,10 +36,3 @@ python manage.py runserver
 5) To install a new app. Navigate to the Project root and run the following command:
 
 python manage.py startapp [app_name]
-
-
-
-
-
-
-# CommonsShare_AppStore
