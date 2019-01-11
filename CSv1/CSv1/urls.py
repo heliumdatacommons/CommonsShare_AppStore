@@ -13,10 +13,10 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import include, url
 from django.contrib import admin
+
 from CS_Apps import views
-from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
@@ -27,4 +27,8 @@ urlpatterns = [
     url(r'^apps/$', views.show_apps, name='apps-view'),
     url(r'^$', views.home_page_view, name='home-page-view'),
     url(r'^phenotype$', views.phenotype_analyze, name="phenotype_analyze"),
+]
+
+urlpatterns += [
+    url('^pivot_hail/', include('pivot_hail.urls')),
 ]
