@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Input PIVOT appliance worker container configuration</h2>
+        </div>
+    </div>
+</div>
+
+{% block content %}
+<div class="modal-body">
+    <input type="hidden" id="pivot_url"/>
+    <input type="hidden" id="default_num_insts" value="{{ cm.extra_data.num_instances }}"/>
+    <input type="hidden" id="default_num_cpus" value="{{ cm.extra_data.num_cpus }}"/>
+    <input type="hidden" id="default_num_mems" value="{{ cm.extra_data.mem_size }}"/>
+    {# Number of instances #}
+    <div class="form-group">
+        <fieldset>
+            <label for="txtInstance" class="col-sm-4 control-label">Number of instances: </label>
+            <input id="txtInstance" class="col-sm-8 modal-only-required" value="{{ cm.extra_data.num_instances }}">
+        </fieldset>
+        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ cm.extra_data.num_instances }} to control costs.</div>
+    </div>
+    {# Resources #}
+    <div class="form-group">
+        <fieldset>
+            <label for="txtCPU" class="col-sm-4 control-label">Number of CPUs: </label>
+            <input id="txtCPU" class="col-sm-8 modal-only-required" value="{{ cm.extra_data.num_cpus }}">
+        </fieldset>
+        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ cm.extra_data.num_cpus }} to control costs.</div>
+        <fieldset>
+            <label for="txtMEM" class="col-sm-4 control-label">Memory (MB): </label>
+            <input id="txtMEM" class="col-sm-8 modal-only-required" value="{{ cm.extra_data.mem_size }}">
+        </fieldset>
+        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ cm.extra_data.mem_size }} to control costs.</div>
+    </div>
+    {# Token #}
+    <div class="form-group">
+        <fieldset>
+            <label for="txtToken" class="col-sm-4 control-label">Jupyter Token: </label>
+            <input id="txtToken" type="password" class="col-sm-8 modal-only-required">
+        </fieldset>
+    </div>
+    <div id='pivot-error' class="alert alert-danger" role="alert" hidden></div>
+</div>
+
+<div class="modal-footer">
+    <a type="button" class="btn btn-success" id="join-group-btn"
+       href="/pivot_hail/deploy/" disabled>Launch PIVOT</a> 
+</div>
+{% endblock %}

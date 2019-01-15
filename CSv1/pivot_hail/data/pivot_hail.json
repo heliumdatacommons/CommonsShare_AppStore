@@ -1,0 +1,98 @@
+{
+    "id": "hail",
+    "containers": [
+      {
+        "id": "namenode",
+        "type": "service",
+        "image": "dchampion24/hadoop-hdfs-namenode:2.7.5",
+        "resources": {
+          "cpus": 1,
+          "mem": 1024
+        },
+        "network_mode": "container",
+        "env": {
+          "NAMENODE": "hdfs://@namenode"
+        },
+        "health_check": {
+            "port_index": 0,
+            "protocol": "MESOS_TCP"
+        },
+        "minimum_capacity": 1,
+        "ports": [
+            {"name": "HDFS Namenode UI", "container_port": 50070}
+        ],
+        "cloud": "gcp-compute"
+      },
+      {
+        "id": "datanode",
+        "type": "service",
+        "image": "dchampion24/hadoop-hdfs-datanode:2.7.5",
+        "instances": 1,
+        "resources": {
+          "cpus": 1,
+          "mem": 1024
+        },
+        "network_mode": "container",
+        "env": {
+          "NAMENODE": "hdfs://@namenode"
+        },
+        "cloud": "aws-compute",
+        "dependencies": [
+            "namenode"
+        ]
+      },
+      {
+        "id": "master",
+        "type": "service",
+        "image": "dchampion24/hail:spark-master",
+        "resources": {
+          "cpus": 2,
+          "mem": 4096
+        },
+        "network_mode": "container",
+        "env": {
+          "CS_USER": "clarisca\\@unc.edu",
+          "CS_API_KEY": "jqz1UufwtsqX2PzcK3dVsvYMle0r5zHdyjjTZ9EP2smZIJGtrBOw-QhXvYWqc9_M",
+          "NAMENODE": "hdfs://@namenode",
+          "CONSUL_HTTP_ADDR": "10.52.0.189:9500",
+          "VAULT_ADDR": "http://10.52.0.189:8200",
+          "VAULT_TOKEN": "3649fc45-4592-df75-25ba-f12b72c3215d"
+        },
+        "ports": [
+          {"name": "Application Dashboard", "container_port": 4040},
+          {"name": "Spark Dashboard", "container_port": 8080},
+          {"name": "JupyterLab", "container_port": 8888}
+        ],
+        "args": [],
+        "cloud": "gcp-compute",
+        "dependencies": [
+          "namenode",
+          "datanode"
+        ]
+      },
+      {
+        "id": "workers",
+        "type": "service",
+        "image": "dchampion24/hail:spark-worker",
+        "resources": {
+          "cpus": 4,
+          "mem": 4096
+        },
+        "instances": 1,
+        "network_mode": "container",
+        "env": {
+          "NAMENODE": "hdfs://@namenode",
+          "CONSUL_HTTP_ADDR": "10.52.0.189:9500",
+          "VAULT_ADDR": "http://10.52.0.189:8200",
+          "VAULT_TOKEN": "3649fc45-4592-df75-25ba-f12b72c3215d"
+        },
+        "args": [
+    	 "@master:7077"
+        ],
+        "cloud": "gcp-compute",
+        "dependencies": [
+          "master"
+        ]
+      }
+    ]
+  }
