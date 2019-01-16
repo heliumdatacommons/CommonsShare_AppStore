@@ -49,12 +49,13 @@ Add the IP Address of the local machine to the list of ALLOWED_HOSTS if you are 
 
 7) To develop the new app in your local development environment and get the new app installed in the apps store, follow the steps below:
 
-- Since the OAuth service only returns to a web server hosted in commonsshare.org domain for security reasons, oauth-based user authentication has to be bypassed in the local development environment. This can be managed via a configuration variable, but for now, these lines can be commented out to bypass oauth user authentication: <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CSv1/CS_Apps/views.py#L21-L25>. In addition, this line <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CSv1/templates/base.html#L38> has to be changed to ```<li id="signin-menu"><a href="/accounts/signin/"><span class="glyphicon glyphicon-log-out"></span> Sign In</a></li>``` in order to allow users to sign in.
-- Add an app specific url pattern into CSv1/urls.py for better encapsulation. Follow the example done for PIVOT HAIL app as shown below:
-```
-url('^pivot_hail/', include('pivot_hail.urls')),
-```
-- Update CSv1/templates/apps.html to add your app to the apps page, following example of other apps.
-
+    - Since the OAuth service only returns to a web server hosted in commonsshare.org domain for security reasons, oauth-based user authentication has to be bypassed in the local development environment. This can be managed via a configuration variable, but for now, these lines can be commented out to bypass oauth user authentication: <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CSv1/CS_Apps/views.py#L21-L25>. In addition, this line <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CSv1/templates/base.html#L38> has to be changed to ```<li id="signin-menu"><a href="/accounts/signin/"><span class="glyphicon glyphicon-log-out"></span> Sign In</a></li>``` in order to allow users to sign in.
+    - Add an app specific url pattern into CSv1/urls.py for better encapsulation. Follow the example done for PIVOT HAIL app as shown below:
+    ```
+    url('^pivot_hail/', include('pivot_hail.urls')),
+    ```
+    - Update CSv1/templates/apps.html to add your app to the apps page, following example of other apps.
+    - Update CSv1/settings.py to add your app into INSTALLED_APPS list.
+        
 
 

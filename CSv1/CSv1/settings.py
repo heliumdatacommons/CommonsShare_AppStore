@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'CS_Apps'
+    'CS_Apps',
+    'pivot_hail',
 ]
 
 
@@ -146,10 +147,3 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 
 )
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = "smtp.gmail.com"   #smtp.office365.com,outlook.office365.com
-EMAIL_HOST_USER = 'xxxxxx@gmail.com'
-EMAIL_HOST_PASSWORD = 'xxxx'
-EMAIL_PORT = 587   #485, 995
-EMAIL_USE_TLS = True

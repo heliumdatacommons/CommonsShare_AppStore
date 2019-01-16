@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def deploy(request):
     user = request.user
+    return render(request, "pivot_hail/start.html", {})
+
 
 @login_required
 def start(request):
