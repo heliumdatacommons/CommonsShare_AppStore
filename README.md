@@ -90,14 +90,19 @@ DATABASES = {
 3) Install the required packages in the project virtual environment
 
 ```apt-get install postgresql-10```
+
 ```pip install psycopg2-binary```
 
 4) Create a database in the new postgresql DB. 
 
 ```sudo su - postgres```
+
 ```psql```
+
 create a password for the postgres user
+
 ```\password```
+
 ```CREATE DATABASE <Name of the DB>;```
 
 The password here should match the one specified in the CSv1/settings.py
