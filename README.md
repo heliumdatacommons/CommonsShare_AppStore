@@ -57,4 +57,58 @@ url('^pivot_hail/', include('pivot_hail.urls')),
 - Update CSv1/templates/apps.html to add your app to the apps page, following example of other apps.
 
 
+# Migrate the project from sqlite to postgreSql.
 
+1) Dump the contents to json
+
+```python manage.py dumpdata > dump.json```
+
+2) Switch the db backend in the CSv1/settings.py
+
+Scroll to the Database section:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db-kyle.sqlite3'),
+    }
+}
+
+change this to,
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.posgresql_psycopg2',
+        'NAME': '<Name of the DB>',
+        'USER': 'postgres',
+        'PASSWORD': '<password>',
+        'HOST': 'localhost',
+        'PORT': '5432'
+    }
+}
+    
+3) Install the required packages in the project virtual environment
+
+```apt-get install postgresql-10```
+```pip install psycopg2-binary```
+
+4) Create a database in the new postgresql DB. 
+
+```sudo su - postgres```
+```psql```
+create a password for the postgres user
+```\password```
+```CREATE DATABASE <Name of the DB>;```
+
+The password here should match the one specified in the CSv1/settings.py
+The DB name should match with the one specified in the CSv1/settings.py
+
+5) Migrate the new DB to the same table structure
+
+```python manage.py migrate```
+
+6) Load the json to the new DB
+
+```python manage.py loaddata dump.json```
+
+The "dump.json" is created in the Step-1
