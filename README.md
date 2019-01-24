@@ -67,14 +67,17 @@ url('^pivot_hail/', include('pivot_hail.urls')),
 
 Scroll to the Database section:
 
-```DATABASES = {
+```
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db-kyle.sqlite3'),
     }
-}```
+}
+```
 
 change this to,
+
 
 ```DATABASES = {
     'default': {
@@ -85,7 +88,8 @@ change this to,
         'HOST': 'localhost',
         'PORT': '5432'
     }
-}```
+}
+```
     
 3) Install the required packages in the project virtual environment
 
