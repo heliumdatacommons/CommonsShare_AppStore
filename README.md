@@ -61,7 +61,7 @@ url('^pivot_hail/', include('pivot_hail.urls')),
 
 1) Dump the contents to json
 
-```python manage.py dumpdata > dump.json```
+    ```python manage.py dumpdata > dump.json```
 
 2) Switch the db backend in the CSv1/settings.py
 
@@ -89,31 +89,33 @@ DATABASES = {
     
 3) Install the required packages in the project virtual environment
 
-```apt-get install postgresql-10```
+    ```apt-get install postgresql-10```
 
-```pip install psycopg2-binary```
+    ```pip install psycopg2-binary```
 
 4) Create a database in the new postgresql DB. 
 
-```sudo su - postgres```
+    ```sudo su - postgres```
 
-```psql```
+    ```psql```
 
 create a password for the postgres user
 
-```\password```
+    ```\password```
 
-```CREATE DATABASE <Name of the DB>;```
+    ```CREATE DATABASE <Name of the DB>;```
 
+```
 The password here should match the one specified in the CSv1/settings.py
 The DB name should match with the one specified in the CSv1/settings.py
+```
 
 5) Migrate the new DB to the same table structure
 
-```python manage.py migrate```
+    ```python manage.py migrate```
 
 6) Load the json to the new DB
 
-```python manage.py loaddata dump.json```
+    ```python manage.py loaddata dump.json```
 
 The "dump.json" is created in the Step-1
