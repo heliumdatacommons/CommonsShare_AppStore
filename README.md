@@ -106,8 +106,10 @@ change this to,
 create a password for the postgres user
 
     ```\password```
+    
 
     ```CREATE DATABASE <Name of the DB>;```
+    
 
 The password here should match the one specified in the CSv1/settings.py
 
