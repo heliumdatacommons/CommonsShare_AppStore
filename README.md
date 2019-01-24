@@ -67,16 +67,16 @@ url('^pivot_hail/', include('pivot_hail.urls')),
 
 Scroll to the Database section:
 
-DATABASES = {
+```DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db-kyle.sqlite3'),
     }
-}
+}```
 
 change this to,
 
-DATABASES = {
+```DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.posgresql_psycopg2',
         'NAME': '<Name of the DB>',
@@ -85,7 +85,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432'
     }
-}
+}```
     
 3) Install the required packages in the project virtual environment
 
@@ -105,8 +105,9 @@ create a password for the postgres user
 
     ```CREATE DATABASE <Name of the DB>;```
 
-The password here should match the one specified in the CSv1/settings.py.
-The DB name should match with the one specified in the CSv1/settings.py.
+The password here should match the one specified in the CSv1/settings.py
+
+The DB name should match with the one specified in the CSv1/settings.py
 
 5) Migrate the new DB to the same table structure
 
