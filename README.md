@@ -115,10 +115,14 @@ The DB name should match with the one specified in the CSv1/settings.py
 
 5) Migrate the new DB to the same table structure
 
+    
     ```python manage.py migrate```
+    
 
 6) Load the json to the new DB
 
+    
     ```python manage.py loaddata dump.json```
+    
 
 The "dump.json" is created in the Step-1
