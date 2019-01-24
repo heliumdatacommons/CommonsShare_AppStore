@@ -4,5 +4,5 @@ from pivot_hail import views
 
 urlpatterns = [
     url(r'^deploy/$', views.deploy, name='hail_deploy'),
-    url(r'^start/$', views.deploy, name='hail_start'),
+    url(r'^start/$', views.start, name='hail_start'),
 ]
