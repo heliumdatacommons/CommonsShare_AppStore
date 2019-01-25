@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container">
@@ -41,9 +42,9 @@
         <fieldset>
             <label for="optCloud" class="col-xs-4">PIVOT Cloud Deployment Option: </label>
             <select id="optCloud" class="col-xs-8">
-                <option value="Optimal">Optimal</option>
-                <option value="AWS">AWS</option>
-                <option value="GCP">GCP</option>
+                <option value="optimal">Optimal</option>
+                <option value="aws">AWS</option>
+                <option value="gcp">GCP</option>
             </select>
         </fieldset>
         <div class="alert alert-info" role="alert">Select which cloud, AWS or GCP, to deploy HAIL appliance or let PIVOT determine the optimal placement.</div>
@@ -60,11 +61,11 @@
 </div>
 
 <div class="modal-footer">
-    <a type="button" class="btn btn-success" id="btn-launch-pivot"
-       href="/pivot_hail/deploy/">Launch PIVOT</a>
-</div>s
-{% endblock %}
+    <button class="btn btn-success" id="btn-launch-pivot">Launch PIVOT</button>
+</div>
 
 {% block extra_js %}
     <script type="text/javascript" src="{% static "js/pivot_launch.js" %}"></script>
+{% endblock %}
+
 {% endblock %}

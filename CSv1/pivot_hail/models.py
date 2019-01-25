@@ -2,8 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-#from django.contrib.postgres.fields import JSONField
-from jsonfield import JSONField
+from django.contrib.postgres.fields import JSONField
 
 # Create your models here.
 
