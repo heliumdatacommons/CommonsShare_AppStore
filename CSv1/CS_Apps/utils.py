@@ -4,19 +4,22 @@ import datetime
 import json
 
 from django.http import HttpResponseRedirect, JsonResponse
+from django.conf import settings
 
 
-def get_auth_redirect():
+def get_auth_redirect(request):
     # set return_to to be where user is redirected back to upon successful login
     # it needs to be somewhere that will handle the access_token url parameter, which
     # can be the url of the current app, since check_authorization will check for it
     # right now this is restricted to domains matching '*.commonsshare.org'
-    return_to = 'https://apps.commonsshare.org/apps/'
-
-    url = 'https://auth.commonsshare.org/authorize?provider=auth0'
+    return_to = '/apps/'
+    return_url = '&return_to={}://{}/apps'.format(request.scheme, request.get_host())
+    url = '{}authorize?provider=auth0'.format(settings.OAUTH_SERVICE_SERVER_URL)
     url += '&scope=openid%20profile%20email'
-    url += '&return_to=' + return_to
-    resp = requests.get(url)
+    url += return_to
+    auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
+    resp = requests.get(url, headers={'Authorization': auth_header_str},
+                        verify=False)
     print("resp:", resp)
     body = json.loads(resp.content.decode('utf-8'))
     print("body:", body)
@@ -25,9 +28,10 @@ def get_auth_redirect():
 
 def check_authorization(request):
     print(request.GET.get("token"))
+    token = request.GET.get("token")
     skip_validate = False
-    token = None
-    r_invalid = get_auth_redirect()
+    if not token:
+        r_invalid = get_auth_redirect(request)
     if 'HTTP_AUTHORIZATION' in request.META:
         auth_header = request.META.get('HTTP_AUTHORIZATION')
         if not auth_header:

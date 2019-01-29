@@ -1,4 +1,7 @@
 *.pyc
 .idea
+CSv1/staticfiles/
+CSv1/CSv1/local_settings.py
+CSv1/pivot_hail/data/
 venv/
 

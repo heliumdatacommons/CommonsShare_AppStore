@@ -85,9 +85,6 @@ def show_apps(request):
     return render(request, "apps.html", {})
 
 
-def dashboard_view(request):
-    return render(request, "dashboard.html", {})
-
 def phenotype_analyze(request):
     print(request.GET)
     auth_resp = check_authorization(request)

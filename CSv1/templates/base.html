@@ -5,13 +5,15 @@
   <title>Commons Share</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
   <link rel="stylesheet" href="/static/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/cs_core.css">
   <link rel="stylesheet" href="/static/css/cs_extends.css">
+  {% block extra_css %}{% endblock %}
+
   <script src="/static/js/jquery-3.3.1.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
-
+  <script src="/static/js/csrf_ajax_setup.js"></script>
+  {% block extra_js %}{% endblock %}
 </head>
 <body>
 
@@ -47,7 +49,7 @@
 
 	<div class="main-container">
         {% block content %}
-
+            {% csrf_token %}
         {% endblock %}
     </div>
 </body>

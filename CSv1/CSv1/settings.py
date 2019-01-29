@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+local_settings_module = os.environ.get('LOCAL_SETTINGS', 'CSv1.local_settings')
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
@@ -26,7 +27,9 @@ SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['34.197.171.203','apps.commonsshare.org']
+ALLOWED_HOSTS = ['34.197.171.203',
+                 'apps.commonsshare.org',
+                 'localhost']
 
 
 # Application definition
@@ -39,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'CS_Apps'
+    'CS_Apps',
+    'pivot_hail',
 ]
 
 
@@ -107,6 +111,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+##################
+# LOCAL SETTINGS #
+##################
+
+# Allow any settings to be defined in local_settings.py which should be
+# ignored in your version control system allowing for settings to be
+# defined per machine.
+local_settings = __import__(local_settings_module, globals(), locals(), ['*'])
+for k in dir(local_settings):
+    locals()[k] = getattr(local_settings, k)
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -133,9 +148,8 @@ STATICFILES_DIRS = (
 
 )
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = "smtp.gmail.com"   #smtp.office365.com,outlook.office365.com
-EMAIL_HOST_USER = 'xxxxxx@gmail.com'
-EMAIL_HOST_PASSWORD = 'xxxx'
-EMAIL_PORT = 587   #485, 995
-EMAIL_USE_TLS = True
+# PIVOT HAIL APP specific settings
+INITIAL_COST_CPU = 6
+INITIAL_COST_MEM = 6 # in MB
+
+# Other APPs specific settings can go here
