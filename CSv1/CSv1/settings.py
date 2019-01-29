@@ -147,3 +147,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 
 )
+
+# PIVOT HAIL APP specific settings
+INITIAL_COST_CPU = 6
+INITIAL_COST_MEM = 6 # in MB
+
+# Other APPs specific settings can go here

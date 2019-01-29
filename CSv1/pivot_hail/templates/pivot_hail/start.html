@@ -58,11 +58,12 @@
         <div class="alert alert-info" role="alert">Enter a token which will be later used to log in to Jupyter running on the HAIL cluster.</div>
     </div>
     <div id='pivot-error' class="alert alert-danger" role="alert" hidden></div>
+    <hr>
+    <div class="form-group">
+    <button class="btn btn-success float-left" id="btn-launch-pivot">Launch PIVOT</button>
+    </div>
 </div>
 
-<div class="modal-footer">
-    <button class="btn btn-success" id="btn-launch-pivot">Launch PIVOT</button>
-</div>
 
 {% block extra_js %}
     <script type="text/javascript" src="{% static "js/pivot_launch.js" %}"></script>
