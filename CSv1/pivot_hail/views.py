@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, JsonResponse
 
 from rest_framework import status
 
@@ -82,11 +82,20 @@ def deploy(request):
         avail_cpus = 0
         avail_mems = 0
         for cluster in return_data:
-            avail_cpus += cluster['attributes']['resources']['cpus']
-            avail_mems += cluster['attributes']['resources']['mem']
+            avail_cpus += cluster['resources']['cpus']
+            avail_mems += cluster['resources']['mem']
+
+        if avail_cpus < 1 or avail_mems < 1000:
+            return JsonResponse(data={'error': 'There are no resource available at the moment.'
+                                               'Please check <a href="https://github.com/heliump'
+                                               'lusdatastage/Reservations/issues/1">HAIL cluster '
+                                               'reservation queue</a> to see who are currently '
+                                               'using HAIL cluster'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
         req_cpus = settings.INITIAL_COST_CPU + int(num_cpus) * int(num_insts)
         req_mem = settings.INITIAL_COST_MEM + int(mem_size) * int(num_insts)
+
 
         if req_cpus <= avail_cpus and req_mem <= avail_mems:
             # there are enough resources, go ahead to request to create HAIL cluster
@@ -100,14 +109,13 @@ def deploy(request):
                 return JsonResponse(data={'error': response.text},
                                     status=status.HTTP_400_BAD_REQUEST)
         else:
-            err_msg = 'There are not enough resources available. {} Please reduce number of ' \
+            err_msg = 'There are not enough resources available. Please reduce number of ' \
                       'instances and resources requested to be within our available resource pool ' \
-                      '({} CPUs and {}MB memory).'
-            if req_cpus > avail_cpus:
-                err_msg = err_msg.format()
+                      '({} CPUs and {}MB memory available at the moment).'
             # there are not enough resources, notify users to reduce number of requested resources
-            return JsonResponse(data={'error': "There are not enough resources available. "
-                                               "Please reduce number of instances, CPUS, "},
+            a_cpus = int(avail_cpus)
+            a_mems = int(avail_mems)
+            return JsonResponse(data={'error': err_msg.format(a_cpus, a_mems)},
                                 status=status.HTTP_400_BAD_REQUEST)
 
     redirect_url = app_url + '/ui'
