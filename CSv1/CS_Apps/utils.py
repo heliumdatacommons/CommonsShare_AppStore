@@ -14,7 +14,7 @@ def get_auth_redirect(request):
     # right now this is restricted to domains matching '*.commonsshare.org'
     return_to = '/apps/'
     return_url = '&return_to={}://{}/apps'.format(request.scheme, request.get_host())
-    url = '{}authorize?provider=auth0'.format(settings.OAUTH_SERVICE_SERVER_URL)
+    url = '{}authorize?provider=globus'.format(settings.OAUTH_SERVICE_SERVER_URL)
     url += '&scope=openid%20profile%20email'
     url += return_to
     auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
