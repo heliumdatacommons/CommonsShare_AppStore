@@ -12,11 +12,10 @@ def get_auth_redirect(request):
     # it needs to be somewhere that will handle the access_token url parameter, which
     # can be the url of the current app, since check_authorization will check for it
     # right now this is restricted to domains matching '*.commonsshare.org'
-    return_to = '/apps/'
     return_url = '&return_to={}://{}/apps'.format(request.scheme, request.get_host())
     url = '{}authorize?provider=globus'.format(settings.OAUTH_SERVICE_SERVER_URL)
     url += '&scope=openid%20profile%20email'
-    url += return_to
+    url += return_url
     auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
     resp = requests.get(url, headers={'Authorization': auth_header_str},
                         verify=False)
