@@ -3,8 +3,35 @@ import uuid
 import datetime
 import json
 
+from django.utils import timezone
 from django.http import HttpResponseRedirect, JsonResponse
 from django.conf import settings
+from django.contrib.auth import authenticate, login as auth_login
+
+
+def authenticate_user(request, username=None, access_token=None, name=None, email=None):
+    if name:
+        namestrs = name.split(' ')
+        fname = namestrs[0]
+        lname = namestrs[-1]
+    else:
+        fname = ''
+        lname = ''
+
+    tgt_user = None
+    if username and access_token:
+        kwargs = {}
+        kwargs['request'] = request
+        kwargs['username'] = username
+        kwargs['access_token'] = access_token
+        kwargs['first_name'] = fname
+        kwargs['last_name'] = lname
+        kwargs['email'] = email
+        tgt_user = authenticate(**kwargs)
+        if tgt_user:
+            auth_login(request, tgt_user)
+
+    return tgt_user
 
 
 def get_auth_redirect(request):
@@ -19,18 +46,17 @@ def get_auth_redirect(request):
     auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
     resp = requests.get(url, headers={'Authorization': auth_header_str},
                         verify=False)
-    print("resp:", resp)
     body = json.loads(resp.content.decode('utf-8'))
-    print("body:", body)
     return HttpResponseRedirect(body['authorization_url'])
 
 
 def check_authorization(request):
-    print(request.GET.get("token"))
     token = request.GET.get("token")
-    skip_validate = False
+    now = timezone.now
     if not token:
-        r_invalid = get_auth_redirect(request)
+        token = request.GET.get("access_token")
+    r_invalid = get_auth_redirect(request)
+    skip_validate = False
     if 'HTTP_AUTHORIZATION' in request.META:
         auth_header = request.META.get('HTTP_AUTHORIZATION')
         if not auth_header:
@@ -44,39 +70,41 @@ def check_authorization(request):
             return r_invalid
     elif 'token' in request.GET:
         token = request.GET.get('token')
-        print(token)
+    elif 'access_token' in request.GET:
+        token = request.GET.get('access_token')
     elif 'session_id' in request.session and request.session.get_expiry_date() >= now():
-        # print(request.session.get_expiry_date())
-        # print('session_id valid, expires in: ' + str((request.session.get_expiry_date() - now()).total_seconds()))
         skip_validate = True
     else:
-        print('no authorization found')
-        print(skip_validate)
-        print("r_invalid", r_invalid)
         return r_invalid
 
     if not skip_validate:
         # need to check the token validity
         validate_url = 'https://auth.commonsshare.org/validate_token?access_token='
         resp = requests.get(validate_url + token)
-        print(resp)
         if resp.status_code == 200:
             body = json.loads(resp.content.decode('utf-8'))
-            if body.get('active', False) == True:
+            if body.get('active', False):
                 # the token was valid, set a session
-                print('received access token was valid, storing session')
                 request.session['session_id'] = str(uuid.uuid4())
                 request.session.set_expiry(datetime.timedelta(days=30).total_seconds())
-                return JsonResponse(status=200, data={
-                    'status_code': 200,
-                    'message': 'Successful authentication',
-                    'user': body.get('username')})
-            # print(resp)
-            # print(resp.content)
+                uname = body.get('username', None)
+                uemail = body.get('email', None)
+                name = body.get('name', None)
+                ret_user = authenticate_user(request, username=uname, access_token=token,
+                                             name=name, email=uemail)
+                if ret_user:
+                    return JsonResponse(status=200, data={
+                        'status_code': 200,
+                        'message': 'Successful authentication',
+                        'user': uname})
+
             r = JsonResponse(status=403, data={
                 'status_code': 403,
                 'message': 'Request forbidden'})
             return r
+        else:
+            # picked up existing valid session, no need to check again
+            return JsonResponse(status=403, data={'status_code': 403, 'message': 'forbidden'})
     else:
         # picked up existing valid session, no need to check again
         return JsonResponse(status=200, data={'status_code': 200, 'message': 'session was valid'})

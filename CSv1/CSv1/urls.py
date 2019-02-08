@@ -22,8 +22,6 @@ from CS_Apps import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^signout_view$', views.signout_view),
-    url(r'^accounts/signup/$', views.signup_view),
-    url(r'^accounts/signin/$', views.signin_view, name='signin-view'),
     url(r'^apps/$', views.show_apps, name='apps-view'),
     url(r'^$', views.home_page_view, name='home-page-view'),
     url(r'^phenotype$', views.phenotype_analyze, name="phenotype_analyze"),

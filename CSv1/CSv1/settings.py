@@ -60,6 +60,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'CS_Apps.backends.oauth.OAuth',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 ROOT_URLCONF = 'CSv1.urls'
 
 TEMPLATES = [
@@ -85,12 +90,11 @@ WSGI_APPLICATION = 'CSv1.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+
 }
 
+
+LOGIN_URL = '/'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

@@ -1,51 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
-from django.shortcuts import redirect
 import json
-from django.utils import timezone
 
-from utils import check_authorization
+from django.shortcuts import render
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from utils import check_authorization, authenticate_user
 
 
-now = timezone.now
 # Create your views here.
 
 
 def home_page_view(request):
     auth_resp = check_authorization(request)
-    print("auth_resp:", auth_resp)
-    print(auth_resp.status_code)
     if auth_resp.status_code != 200:
         return auth_resp
     return render(request, "home.html", {})
 
 
-def signin_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect('apps-view')
-            else:
-                message = "User is not active."
-                return render(request, "sign_in.html", {'message': message})
-        else:
-            message = "Invalid login."
-            return render(request, "sign_in.html", {'message': message})
-    else:
-        return render(request, "sign_in.html", {})
-
-
 def signout_view(request):
-    print(request)
+    #print(request)
     #print(request.GET['token'])
     #print(request.GET['session_id'])
     #del  request.GET['token']
@@ -54,44 +29,30 @@ def signout_view(request):
     return redirect('/')
 
 
-def signup_view(request):
-    if request.method == 'POST':
-
-        fields_mapping = {}
-        fields_mapping["first_name"] = "first_name"
-        fields_mapping["last_name"] = "last_name"
-        fields_mapping["username"] = "username"
-        fields_mapping["email"] = "email"
-        fields_mapping["password1"] = "password"
-
-        params = dict()
-        for field in fields_mapping:
-            _field = fields_mapping[field]
-            params[_field] = request.POST[field]
-
-        user = User.objects.create_user(**params)
-        user.save()
-        return redirect("signin-view")
-
-    else:
-        return render(request, "sign_up.html", {})
-
-
-# def _signup(request):
-
 def show_apps(request):
-    """
-	"""
-    return render(request, "apps.html", {})
+    token = request.GET.get('access_token', None)
+    uname = request.GET.get('user_name', None)
+    uemail = request.GET.get('email', None)
+    if not token or not uname:
+        auth_resp = check_authorization(request)
+        if auth_resp.status_code != 200:
+            return HttpResponseRedirect("/")
+        else:
+            return render(request, "apps.html", {})
+    else:
+        # requests coming from auth service return which already authenticated the user
+        name = request.GET.get('name', None)
+        ret_user = authenticate_user(request, username=uname, access_token=token,
+                                name=name, email=uemail)
+        if ret_user:
+            return render(request, "apps.html", {})
+        else:
+            return HttpResponseBadRequest(
+                'Bad request - no valid access_token or user_name is provided')
 
 
 def phenotype_analyze(request):
-    print(request.GET)
     auth_resp = check_authorization(request)
-    print("auth_resp:", auth_resp)
-    print(type(auth_resp))
-    print("="*100)
-    print(request.META)
     if auth_resp.status_code != 200:
         return HttpResponseRedirect("/")
     else:

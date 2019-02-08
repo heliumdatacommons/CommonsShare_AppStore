@@ -16,6 +16,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from rest_framework import status
 
 from models import HailConfig
+from CS_Apps.utils import check_authorization
+
 
 # Create your views here.
 
@@ -123,8 +125,8 @@ def deploy(request):
     return JsonResponse(status=status.HTTP_200_OK, data={'url': redirect_url})
 
 
-@login_required
-def start(request):
+@login_required()
+def login_start(request):
     conf_qs = HailConfig.objects.all()
     if not conf_qs:
         config_file = 'pivot_hail/data/pivot_hail.json'
@@ -159,5 +161,47 @@ def start(request):
             }
             break
 
-
     return render(request, "pivot_hail/start.html", context)
+
+
+def start(request):
+    auth_resp = check_authorization(request)
+    if auth_resp.status_code != 200:
+        return HttpResponseRedirect("/")
+    else:
+        conf_qs = HailConfig.objects.all()
+        if not conf_qs:
+            config_file = 'pivot_hail/data/pivot_hail.json'
+            with open(config_file, 'r') as fp:
+                p_data = load(fp)
+                if not 'id' in p_data or not 'containers' in p_data:
+                    errmsg = "PIVOT JSON Configuration file is not valid"
+                    messages.error(request, errmsg)
+                    if request.is_ajax():
+                        return JsonResponse(data={'error': errmsg},
+                                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    else:
+                        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+                HailConfig.objects.create(data=p_data)
+        else:
+            p_data = HailConfig.objects.all().first().data
+
+        # get default value to show on the start page for users to override as needed
+        insts = None
+        cpus = None
+        mems = None
+        context = {}
+        for con in p_data['containers']:
+            if con['id'] == 'workers':
+                insts = con['instances']
+                cpus = con['resources']['cpus']
+                mems = con['resources']['mem']
+                context = {
+                    'num_instances': str(insts),
+                    'num_cpus': str(cpus),
+                    'mem_size': str(mems)
+                }
+                break
+
+
+        return render(request, "pivot_hail/start.html", context)
