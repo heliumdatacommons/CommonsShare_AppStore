@@ -23,25 +23,18 @@
     <div class="row">
         <div class="webapp col-lg-3 col-md-4 col-sm-12">
           <div class="webapp-listing">
-              <a class="webapp-link" href="https://monarchinitiative.org/analyze/phenotypes" target="_blank" title="Phenotypes-Analyze">
-                    <img src="{% static 'images/carousel-monarch.png' %}" alt="" width="205" height="205">
-              <h3>
-                Phenotype-Analyze
-              </h3>
-              </a>
-              <a class="webapp-link" href="/pivot_hail/login_start/" target="_blank" title="PIVOT">
-                    <img src="{% static 'img/pivot_logo.jpg' %}" alt="" width="201" height="257">
-              <h3>
-                Deploy HAIL Cluster on PIVOT Appliance
-              </h3>
-              </a>
-            <p class="app-description" style="display:none">
-              <br><br>
-              <a href="#">View Resource Page</a>
-            </p>
+              {% for app in apps_list %}
+                  <a class="webapp-link" href="{{ app.url }}" target="_blank" title="{{ app.verbose_name }}">
+                        <img src="{% static app.logo %}" alt="" width="205" height="205">
+                  <h3>
+                    {{ app.verbose_name }}
+                  </h3>
+                  </a>
+              {% endfor %}
           </div>
         </div>
-      
     </div>
+  </div>
 </div>
-  {% endblock %}
+
+{% endblock %}
