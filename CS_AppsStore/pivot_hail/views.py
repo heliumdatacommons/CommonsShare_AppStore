@@ -16,7 +16,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from rest_framework import status
 
 from models import HailConfig
-from CS_Apps.utils import check_authorization
+from apps_core_services.utils import check_authorization
 
 
 # Create your views here.

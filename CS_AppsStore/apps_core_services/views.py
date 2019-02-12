@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
@@ -49,13 +47,3 @@ def show_apps(request):
         else:
             return HttpResponseBadRequest(
                 'Bad request - no valid access_token or user_name is provided')
-
-
-def phenotype_analyze(request):
-    auth_resp = check_authorization(request)
-    if auth_resp.status_code != 200:
-        return HttpResponseRedirect("/")
-    else:
-        body = json.loads(auth_resp.content.decode('utf-8'))
-        if body['status_code'] == 200:
-             return HttpResponseRedirect("https://monarchinitiative.org/analyze/phenotypes")

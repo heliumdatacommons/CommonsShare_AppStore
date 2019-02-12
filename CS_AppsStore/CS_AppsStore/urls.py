@@ -1,4 +1,4 @@
-"""CSv1 URL Configuration
+"""CS_AppsStore URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from CS_Apps import views
+from apps_core_services import views
 
 
 urlpatterns = [
@@ -24,9 +24,9 @@ urlpatterns = [
     url(r'^signout_view$', views.signout_view),
     url(r'^apps/$', views.show_apps, name='apps-view'),
     url(r'^$', views.home_page_view, name='home-page-view'),
-    url(r'^phenotype$', views.phenotype_analyze, name="phenotype_analyze"),
 ]
 
 urlpatterns += [
     url('^pivot_hail/', include('pivot_hail.urls')),
+    url('^phenotype/', include('phenotype.urls')),
 ]

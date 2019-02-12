@@ -15,3 +15,10 @@ class HailConfig(models.Model):
 
     def __str__(self):
         return 'HAIL Configuration in JSON format'
+
+
+class HailStatus(models.Model):
+    """
+    model to keep track of hail cluster status
+    """
+    appliance_id = models.CharField(max_length=160)

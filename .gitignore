@@ -1,7 +1,8 @@
 *.pyc
 .idea
-CSv1/staticfiles/
-CSv1/CSv1/local_settings.py
-CSv1/pivot_hail/data/
+CS_AppsStore/staticfiles/
+CS_AppsStore/CS_AppsStore/local_settings.py
+CS_AppsStore/pivot_hail/data/
+CS_AppsStore/CS_AppsStore/__pycache__
 venv/
 
