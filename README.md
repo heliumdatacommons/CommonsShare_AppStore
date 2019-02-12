@@ -37,9 +37,19 @@ Add the IP Address of the local machine to the list of ALLOWED_HOSTS if you are 
 
 ```python manage.py runserver```
 
-5) To install a new app. Navigate to the Project root and run the following command:
+5) To install a new app, follow the steps below:
 
-```python manage.py startapp [app_name]```
+- Navigate to the Project root and run the following command:
+
+    ```python manage.py startapp [app_name]```
+
+- Update CS_AppsStore/settings.py to add your app into INSTALLED_APPS list and add any other app specific settings as needed. Refer to how existing apps such as pivot_hail and phenotype apps are set up there.
+
+- Add an app specific url pattern into CS_AppsStore/urls.py for better encapsulation. Follow the example done for PIVOT HAIL app as shown below:
+    ```
+    url('^pivot_hail/', include('pivot_hail.urls')),
+    ```
+- Create apps.py and __init__.py to have app-specific custom name, verbose_name, url and logo fields populated in AppConfig subclass. Refer to existing apps such as pivot_hail and phenotype apps to see how this is done. The custom verbose_name, url, and logo fields are used to dynamically populate the added apps to apps page for invocation of the app without need for specific coding.
 
 6) Run the following commands to make sure database migration has taken place and all static files have been collectioned to the server:
 
@@ -47,16 +57,6 @@ Add the IP Address of the local machine to the list of ALLOWED_HOSTS if you are 
 
 ```python manage.py collectstatic```
 
-7) To develop the new app in your local development environment and get the new app installed in the apps store, follow the steps below:
-
-    - Since the OAuth service only returns to a web server hosted in commonsshare.org domain for security reasons, oauth-based user authentication has to be bypassed in the local development environment. This can be managed via a configuration variable, but for now, these lines can be commented out to bypass oauth user authentication: <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CS_AppsStore/CS_Apps/views.py#L21-L25>. In addition, this line <https://github.com/heliumdatacommons/CommonsShare_AppStore/blob/master/CS_AppsStore/templates/base.html#L38> has to be changed to ```<li id="signin-menu"><a href="/accounts/signin/"><span class="glyphicon glyphicon-log-out"></span> Sign In</a></li>``` in order to allow users to sign in.
-    - Add an app specific url pattern into CS_AppsStore/urls.py for better encapsulation. Follow the example done for PIVOT HAIL app as shown below:
-    ```
-    url('^pivot_hail/', include('pivot_hail.urls')),
-    ```
-    - Update CS_AppsStore/templates/apps.html to add your app to the apps page, following example of other apps.
-    - Update CS_AppsStore/settings.py to add your app into INSTALLED_APPS list.
-        
 
 # Migrate the project from sqlite to postgreSql.
 
