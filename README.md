@@ -11,7 +11,7 @@ git clone https://github.com/heliumdatacommons/CommonsShare_AppStore.git
 CommonsShare_AppStore/              - root 
 ├── CS_AppsStore/                   - Project root
     ├── CS_AppsStore/               - Django root
-    │   ├── __init__.py
+    │   ├── ```__init__.py```
     │   ├── settings.py
     │   ├── urls.py
     │   └── wsgi.py
@@ -49,7 +49,7 @@ Add the IP Address of the local machine to the list of ALLOWED_HOSTS if you are 
     ```
     url('^pivot_hail/', include('pivot_hail.urls')),
     ```
-- Create apps.py and __init__.py to have app-specific custom name, verbose_name, url and logo fields populated in AppConfig subclass. Refer to existing apps such as pivot_hail and phenotype apps to see how this is done. The custom verbose_name, url, and logo fields are used to dynamically populate the added apps to apps page for invocation of the app without need for specific coding.
+- Create apps.py and ```__init__.py``` to have app-specific custom name, verbose_name, url and logo fields populated in AppConfig subclass. Refer to existing apps such as pivot_hail and phenotype apps to see how this is done. The custom verbose_name, url, and logo fields are used to dynamically populate the added apps to apps page for invocation of the app without need for specific coding.
 
 6) Run the following commands to make sure database migration has taken place and all static files have been collectioned to the server:
 
