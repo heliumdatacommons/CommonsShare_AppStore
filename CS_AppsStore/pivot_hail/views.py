@@ -11,12 +11,14 @@ from django.contrib import messages
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseServerError
+from django.utils import timezone
 
 from rest_framework import status
 
-from models import HailConfig
+from models import HailConfig, HailStatus
 from apps_core_services.utils import check_authorization
+from apps_core_services.orchestrator_service import get_running_appliances_usage_status
 
 
 # Create your views here.
@@ -89,10 +91,9 @@ def deploy(request):
 
         if avail_cpus < 1 or avail_mems < 1000:
             return JsonResponse(data={'error': 'There are no resource available at the moment.'
-                                               'Please check <a href="https://github.com/heliump'
-                                               'lusdatastage/Reservations/issues/1">HAIL cluster '
-                                               'reservation queue</a> to see who are currently '
-                                               'using HAIL cluster'},
+                                               'Please check <a href="/pivot_hail/status/">HAIL '
+                                               'cluster current usage status</a> to see who are '
+                                               'currently using HAIL cluster.'},
                                 status=status.HTTP_400_BAD_REQUEST)
 
         req_cpus = settings.INITIAL_COST_CPU + int(num_cpus) * int(num_insts)
@@ -109,11 +110,24 @@ def deploy(request):
             if response.status_code != status.HTTP_200_OK and \
                             response.status_code != status.HTTP_201_CREATED:
                 return JsonResponse(data={'error': response.text},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                # new appliance has been created successfully, record new entry into hail cluster
+                # status table
+                # make sure status of the existing running appliance get updated from running to
+                # deleted
+                curr_time = timezone.now()
+                HailStatus.objects.filter(user=user, appliance_id=app_id, status='R').\
+                    update(status='D', end_timestamp=curr_time)
+                HailStatus.objects.create(user=user, appliance_id=app_id, status='R',
+                                          insts=num_insts, memory=mem_size, cpus=num_cpus,
+                                          start_timestamp=curr_time)
         else:
             err_msg = 'There are not enough resources available. Please reduce number of ' \
                       'instances and resources requested to be within our available resource pool ' \
-                      '({} CPUs and {}MB memory available at the moment).'
+                      '({} CPUs and {}MB memory available at the moment). Check ' \
+                      '<a href="/pivot_hail/status/">HAIL cluster current usage status</a> to see who ' \
+                      'are currently using HAIL cluster.'
             # there are not enough resources, notify users to reduce number of requested resources
             a_cpus = int(avail_cpus)
             a_mems = int(avail_mems)
@@ -121,11 +135,10 @@ def deploy(request):
                                 status=status.HTTP_400_BAD_REQUEST)
 
     redirect_url = app_url + '/ui'
-
     return JsonResponse(status=status.HTTP_200_OK, data={'url': redirect_url})
 
 
-@login_required()
+@login_required
 def login_start(request):
     conf_qs = HailConfig.objects.all()
     if not conf_qs:
@@ -145,9 +158,6 @@ def login_start(request):
         p_data = HailConfig.objects.all().first().data
 
     # get default value to show on the start page for users to override as needed
-    insts = None
-    cpus = None
-    mems = None
     context = {}
     for con in p_data['containers']:
         if con['id'] == 'workers':
@@ -187,9 +197,6 @@ def start(request):
             p_data = HailConfig.objects.all().first().data
 
         # get default value to show on the start page for users to override as needed
-        insts = None
-        cpus = None
-        mems = None
         context = {}
         for con in p_data['containers']:
             if con['id'] == 'workers':
@@ -203,5 +210,13 @@ def start(request):
                 }
                 break
 
-
         return render(request, "pivot_hail/start.html", context)
+
+
+@login_required()
+def status(request):
+    try:
+        get_running_appliances_usage_status('pivot_hail.models.HailStatus',
+                                            request_url=settings.PIVOT_URL + 'appliance/')
+    except ImportError as ex:
+        return HttpResponseServerError(ex.message)

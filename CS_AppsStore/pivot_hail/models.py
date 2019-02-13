@@ -34,11 +34,12 @@ class HailStatus(models.Model):
     # in MB unit
     memory = models.PositiveIntegerField()
     cpus = models.PositiveIntegerField()
-    # time the appliance is started or deleted depending on the status
-    timestamp = models.DateTimeField(auto_now_add=True)
+    # the appliance start and end time stamps
+    start_timestamp = models.DateTimeField(null=True, blank=True)
+    end_timestamp = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ("user", "appliance_id", "status", "timestamp")
+        unique_together = ("user", "appliance_id", "status", "start_timestamp", "end_timestamp")
 
     def __unicode__(self):
         return '{}-{}-{}'.format(self.user.username, self.appliance_id, self.status)
