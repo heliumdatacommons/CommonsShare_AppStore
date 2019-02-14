@@ -79,7 +79,7 @@ def deploy(request):
     url = settings.PIVOT_URL + 'appliance'
     app_url = url + '/' + app_id
     get_response = requests.get(app_url)
-    if get_response.status_code == status.HTTP_404_NOT_FOUND:
+    if get_response.status_code == 404:
         # check whether there are enough resources available to create requested HAIL cluster
         response = requests.get(settings.PIVOT_URL + 'cluster')
         return_data = loads(response.content)
@@ -103,7 +103,7 @@ def deploy(request):
         if req_cpus <= avail_cpus and req_mem <= avail_mems:
             # there are enough resources, go ahead to request to create HAIL cluster
             response = requests.post(url, data=dumps(conf_data))
-            if response.status_code == status.HTTP_409_CONFLICT:
+            if response.status_code ==409:
                 time.sleep(2)
                 response = requests.post(url, data=dumps(conf_data))
 
@@ -135,7 +135,7 @@ def deploy(request):
                                 status=status.HTTP_400_BAD_REQUEST)
 
     redirect_url = app_url + '/ui'
-    return JsonResponse(status=status.HTTP_200_OK, data={'url': redirect_url})
+    return JsonResponse(status=200, data={'url': redirect_url})
 
 
 @login_required
@@ -215,8 +215,10 @@ def start(request):
 
 @login_required()
 def status(request):
-    try:
-        get_running_appliances_usage_status('pivot_hail.models.HailStatus',
-                                            request_url=settings.PIVOT_URL + 'appliance/')
-    except ImportError as ex:
-        return HttpResponseServerError(ex.message)
+    url = settings.PIVOT_URL + 'appliance/'
+    context, err_msg = get_running_appliances_usage_status('pivot_hail.models', 'HailStatus',
+                                                           request_url=url)
+    if err_msg:
+        return HttpResponseServerError(err_msg)
+    else:
+        return render(request, "pivot_hail/status.html", context)

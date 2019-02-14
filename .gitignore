@@ -1,6 +1,6 @@
 *.pyc
 .idea
-CS_AppsStore/staticfiles/
+CS_AppsStore/static/
 CS_AppsStore/CS_AppsStore/local_settings.py
 CS_AppsStore/pivot_hail/data/
 CS_AppsStore/CS_AppsStore/__pycache__
