@@ -20,15 +20,17 @@ def get_running_appliances_usage_status(status_module_path, status_module_class,
     try:
         status_module = import_module(status_module_path)
     except ImportError as ex:
-        return {}, 'module cannot be imported:' + ex.message
+        return {}, 'module cannot be imported: ' + ex.message
 
     status_model = getattr(status_module, status_module_class)
     fields = []
     for field in status_model._meta.fields:
         fields.append(field.name)
 
-    if 'user' not in fields or 'appliance_id' not in fields or 'status' not in fields:
-        return {}, 'model does not have required attributes user, appliance_id, or status'
+    if 'user' not in fields or 'appliance_id' not in fields or 'status' not in fields or \
+            'start_timestamp' not in fields or 'end_timestamp' not in fields:
+        return {}, 'status model does not have required fields user, appliance_id, status, ' \
+                   'start_timestamp, or end_timestamp'
 
     context = {'usage_list': []}
 
