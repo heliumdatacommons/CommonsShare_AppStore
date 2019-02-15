@@ -14,7 +14,8 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseServerError
 from django.utils import timezone
 
-from rest_framework import status
+from rest_framework.status import HTTP_409_CONFLICT, HTTP_404_NOT_FOUND, HTTP_200_OK, \
+    HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
 
 from models import HailConfig, HailStatus
 from apps_core_services.utils import check_authorization
@@ -30,7 +31,7 @@ def deploy(request):
         errmsg = "PIVOT JSON Configuration file cannot be loaded"
         messages.error(request, errmsg)
         return JsonResponse(data={'error': errmsg},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            status=HTTP_500_INTERNAL_SERVER_ERROR)
 
     user = request.user
     # append username to appliance id from JSON request file to make each user to have a
@@ -46,7 +47,7 @@ def deploy(request):
     id_re = re.compile('^[a-zA-Z0-9_-]+$')
     if not id_re.match(app_id):
         return JsonResponse(data={'error': id_validation_failure_msg.format(app_id)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            status=HTTP_500_INTERNAL_SERVER_ERROR)
 
     num_insts = request.POST.get('num_instances', None)
     num_cpus = request.POST.get('num_cpus', None)
@@ -60,7 +61,7 @@ def deploy(request):
     for con in conf_data['containers']:
         if con['id'] and not id_re.match(con['id']):
             return JsonResponse(data={'error': id_validation_failure_msg.format(con['id'])},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status=HTTP_400_BAD_REQUEST)
 
         if cluster_name:
             con['rack'] = cluster_name
@@ -79,7 +80,7 @@ def deploy(request):
     url = settings.PIVOT_URL + 'appliance'
     app_url = url + '/' + app_id
     get_response = requests.get(app_url)
-    if get_response.status_code == 404:
+    if get_response.status_code == HTTP_404_NOT_FOUND:
         # check whether there are enough resources available to create requested HAIL cluster
         response = requests.get(settings.PIVOT_URL + 'cluster')
         return_data = loads(response.content)
@@ -94,7 +95,7 @@ def deploy(request):
                                                'Please check <a href="/pivot_hail/status/">HAIL '
                                                'cluster current usage status</a> to see who are '
                                                'currently using HAIL cluster.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status=HTTP_400_BAD_REQUEST)
 
         req_cpus = settings.INITIAL_COST_CPU + int(num_cpus) * int(num_insts)
         req_mem = settings.INITIAL_COST_MEM + int(mem_size) * int(num_insts)
@@ -103,14 +104,14 @@ def deploy(request):
         if req_cpus <= avail_cpus and req_mem <= avail_mems:
             # there are enough resources, go ahead to request to create HAIL cluster
             response = requests.post(url, data=dumps(conf_data))
-            if response.status_code ==409:
+            if response.status_code ==HTTP_409_CONFLICT:
                 time.sleep(2)
                 response = requests.post(url, data=dumps(conf_data))
 
-            if response.status_code != status.HTTP_200_OK and \
-                            response.status_code != status.HTTP_201_CREATED:
+            if response.status_code != HTTP_200_OK and \
+                            response.status_code != HTTP_201_CREATED:
                 return JsonResponse(data={'error': response.text},
-                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                    status=HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 # new appliance has been created successfully, record new entry into hail cluster
                 # status table
@@ -132,10 +133,10 @@ def deploy(request):
             a_cpus = int(avail_cpus)
             a_mems = int(avail_mems)
             return JsonResponse(data={'error': err_msg.format(a_cpus, a_mems)},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status=HTTP_400_BAD_REQUEST)
 
     redirect_url = app_url + '/ui'
-    return JsonResponse(status=200, data={'url': redirect_url})
+    return JsonResponse(status=HTTP_200_OK, data={'url': redirect_url})
 
 
 @login_required
@@ -150,7 +151,7 @@ def login_start(request):
                 messages.error(request, errmsg)
                 if request.is_ajax():
                     return JsonResponse(data={'error': errmsg},
-                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                        status=HTTP_500_INTERNAL_SERVER_ERROR)
                 else:
                     return HttpResponseRedirect(request.META['HTTP_REFERER'])
             HailConfig.objects.create(data=p_data)
@@ -189,7 +190,7 @@ def start(request):
                     messages.error(request, errmsg)
                     if request.is_ajax():
                         return JsonResponse(data={'error': errmsg},
-                                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                            status=HTTP_500_INTERNAL_SERVER_ERROR)
                     else:
                         return HttpResponseRedirect(request.META['HTTP_REFERER'])
                 HailConfig.objects.create(data=p_data)
