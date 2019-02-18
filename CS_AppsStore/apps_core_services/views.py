@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.apps import apps
 
-from utils import check_authorization, authenticate_user
+from apps_core_services.utils import check_authorization, authenticate_user
 
 
 # Create your views here.

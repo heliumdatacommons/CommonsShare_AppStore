@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import hashlib
 import re
-from json import load, dumps, loads
+from json import load, dumps
 import requests
 import time
 
@@ -17,7 +17,7 @@ from django.utils import timezone
 from rest_framework.status import HTTP_409_CONFLICT, HTTP_404_NOT_FOUND, HTTP_200_OK, \
     HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
 
-from models import HailConfig, HailStatus
+from pivot_hail.models import HailConfig, HailStatus
 from apps_core_services.utils import check_authorization
 from apps_core_services.orchestrator_service import get_running_appliances_usage_status
 
@@ -36,7 +36,7 @@ def deploy(request):
     user = request.user
     # append username to appliance id from JSON request file to make each user to have a
     # unique appliance to work with without stamping over each other
-    hashed_user_id = hashlib.sha256(b'' + user.username).hexdigest()[0:10]
+    hashed_user_id = hashlib.sha256(user.username.encode('utf-8')).hexdigest()[0:10]
     conf_data = conf_qs.first().data
     app_id = conf_data['id'] + hashed_user_id
     conf_data['id'] = app_id
@@ -83,7 +83,7 @@ def deploy(request):
     if get_response.status_code == HTTP_404_NOT_FOUND:
         # check whether there are enough resources available to create requested HAIL cluster
         response = requests.get(settings.PIVOT_URL + 'cluster')
-        return_data = loads(response.content)
+        return_data = response.json()
         avail_cpus = 0
         avail_mems = 0
         for cluster in return_data:
