@@ -113,11 +113,12 @@ def deploy_appliance(config_data, check_res_avail=False):
 def get_running_appliances_usage_status(status_module_path, status_module_class, request_url=''):
     """
     return usage status of all running appliances by querying the status module class input.
-    The status module class must inherit from
-    The class from the imported module must have the following fields:
-    user, appliance_id, status, start_timestamp, end_timestamp. Additionally, the status_model
-    could include optional memory, cpus, insts fields which represent resources allocated for
-    the appliance, e.g., HAIL appliance
+    The status module class must inherit from the abstract ApplianceStatus model which defines
+    required fields that apply to all PIVOT appliances. These fields are:
+    user, appliance_id, status, start_timestamp, end_timestamp. The specific status module class
+    can include additional fields that pertain to its specific needs. For example, HAIL cluster
+    appliance status model includes additional memory, cpus, insts fields which represent resources
+    that will be allocated for the appliance.
     :param status_module_path: the path to be used to import the module
     :param status_module_class: the class name to load from the module
     :param request_url: optional parameter to check whether appliance has been deleted or not
