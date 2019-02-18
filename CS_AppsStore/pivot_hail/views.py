@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import hashlib
 
 from django.contrib import messages
@@ -17,7 +14,7 @@ from rest_framework.status import HTTP_409_CONFLICT, HTTP_200_OK, HTTP_500_INTER
 from pivot_hail.models import HailConfig, HailStatus
 from pivot_hail.utils import get_hail_start_context
 from apps_core_services.utils import check_authorization
-from apps_core_services.pivot_orchestration_service import validate_id, \
+from pivot_orchestration_service.utils import validate_id, \
     get_running_appliances_usage_status, deploy_appliance, PIVOTException, PIVOTResourceException
 
 

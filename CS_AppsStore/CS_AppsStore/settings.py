@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'apps_core_services',
+    'pivot_orchestration_service',
     'pivot_hail',
     'phenotype',
 ]

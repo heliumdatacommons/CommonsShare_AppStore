@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+
+from pivot_orchestration_service.models import ApplianceStatus
 
 # Create your models here.
 
@@ -18,28 +17,16 @@ class HailConfig(models.Model):
         return 'HAIL Configuration in JSON format'
 
 
-class HailStatus(models.Model):
+class HailStatus(ApplianceStatus):
     """
     model to keep track of hail cluster status
     """
-    STATUS = (
-        ('R', 'running'),
-        ('D', 'deleted'),
-    )
     user = models.ForeignKey(User, editable=False, null=False, on_delete=models.CASCADE,
                              related_name='hail_status', related_query_name='hail_status')
-    appliance_id = models.CharField(max_length=160)
-    status = models.CharField(max_length=2, choices=STATUS, default='R')
     insts = models.PositiveIntegerField()
     # in MB unit
     memory = models.PositiveIntegerField()
     cpus = models.PositiveIntegerField()
-    # the appliance start and end time stamps
-    start_timestamp = models.DateTimeField(null=True, blank=True)
-    end_timestamp = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ("user", "appliance_id", "status", "start_timestamp", "end_timestamp")
 
     def __unicode__(self):
         return '{}-{}-{}'.format(self.user.username, self.appliance_id, self.status)

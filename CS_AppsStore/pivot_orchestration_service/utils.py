@@ -1,9 +1,3 @@
-"""
-This service contains generic service functions that pertain to PIVOT deployment of appliances of
-various types, such as HAIL, i2b2_Transmart, Jupyter etc. The purpose of this service is to abstract
-requirement
-"""
-
 import re
 from json import dumps
 import requests
@@ -119,6 +113,7 @@ def deploy_appliance(config_data, check_res_avail=False):
 def get_running_appliances_usage_status(status_module_path, status_module_class, request_url=''):
     """
     return usage status of all running appliances by querying the status module class input.
+    The status module class must inherit from
     The class from the imported module must have the following fields:
     user, appliance_id, status, start_timestamp, end_timestamp. Additionally, the status_model
     could include optional memory, cpus, insts fields which represent resources allocated for
