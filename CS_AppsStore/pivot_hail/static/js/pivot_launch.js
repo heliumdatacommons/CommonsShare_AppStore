@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $('#btn-launch-pivot').on('click', function(e) {
+        e.stopImmediatePropagation();
         setupAjax();
         var num_insts = parseInt($('#txtInstance').val());
         var num_cpus = parseInt($('#txtCPU').val());
