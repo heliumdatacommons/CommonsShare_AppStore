@@ -149,7 +149,7 @@ def get_running_appliances_usage_status(status_module_path, status_module_class,
             get_response = requests.get(url)
             if get_response.status_code == HTTP_404_NOT_FOUND:
                 # appliance has been deleted
-                obj.staus = 'D'
+                obj.status = 'D'
                 obj.end_timestamp = timezone.now()
                 obj.save()
             else:
