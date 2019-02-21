@@ -5,7 +5,7 @@
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
-            <h2>Input PIVOT appliance configuration</h2>
+            <h2>Input HAIL cluster configuration</h2>
         </div>
     </div>
 </div>
@@ -22,7 +22,7 @@
             <label for="txtInstance" class="col-xs-4 control-label">Number of instances: </label>
             <input id="txtInstance" class="col-xs-8 modal-only-required" value="{{ num_instances }}">
         </fieldset>
-        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ num_instances }} to control costs.</div>
+        <div class="alert alert-info" role="alert">We suggest to input a value not greater than the default {{ num_instances }}.</div>
     </div>
     {# Resources #}
     <div class="form-group">
@@ -30,12 +30,12 @@
             <label for="txtCPU" class="col-xs-4">Number of CPUs: </label>
             <input id="txtCPU" class="col-xs-8" value="{{ num_cpus }}">
         </fieldset>
-        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ num_cpus }} to control costs.</div>
+        <div class="alert alert-info" role="alert">We suggest to input a value not greater than the default {{ num_cpus }}.</div>
         <fieldset>
             <label for="txtMEM" class="col-xs-4 control-label">Memory (MB): </label>
             <input id="txtMEM" class="col-xs-8" value="{{ mem_size }}">
         </fieldset>
-        <div class="alert alert-info" role="alert">Entered value cannot be greater than the default {{ mem_size }} to control costs.</div>
+        <div class="alert alert-info" role="alert">We suggest to input a value not greater than the default {{ mem_size }}.</div>
     </div>
     {# Cloud Deployment Option #}
     <div class="form-group">
@@ -60,7 +60,7 @@
     <div id='pivot-error' class="alert alert-danger" role="alert" hidden></div>
     <hr>
     <div class="form-group">
-    <button class="btn btn-success float-left" id="btn-launch-pivot">Launch PIVOT</button>
+    <button class="btn btn-success float-left" id="btn-launch-pivot">Launch HAIL cluster via PIVOT</button>
     </div>
     <div class="alert alert-warning" role="alert">
     Click <a href="/pivot_hail/status/" class="alert-link" target="_blank">here</a> to check status on currently running appliances
