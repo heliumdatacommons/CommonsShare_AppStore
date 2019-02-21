@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponseServerEr
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-from rest_framework.status import HTTP_409_CONFLICT, HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
+from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
     HTTP_400_BAD_REQUEST
 
 from pivot_hail.models import HailConfig, HailStatus

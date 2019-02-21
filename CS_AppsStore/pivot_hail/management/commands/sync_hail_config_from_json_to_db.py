@@ -26,7 +26,7 @@ class Command(BaseCommand):
             with open(config_file, 'r') as fp:
                 p_data = load(fp)
                 if not 'id' in p_data or not 'containers' in p_data:
-                    print "PIVOT JSON Configuration file is not valid"
+                    print("PIVOT JSON Configuration file is not valid")
                 else:
                     conf_qs = HailConfig.objects.all()
                     if not conf_qs:
