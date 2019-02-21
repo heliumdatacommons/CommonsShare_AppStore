@@ -117,13 +117,8 @@ def start(request):
     if auth_resp.status_code != 200:
         return HttpResponseRedirect("/")
     else:
-        context = get_hail_start_context(request)
-        if 'error' in context:
-            messages.error(request, context['error'])
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
-
-        # get default value to show on the start page for users to override as needed
-        return render(request, "pivot_hail/start.html", context)
+        # this is needed to strip out access token from URL
+        return HttpResponseRedirect("/pivot_hail/login_start/")
 
 
 @login_required()
