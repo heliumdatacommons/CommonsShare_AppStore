@@ -8,6 +8,7 @@ git clone https://github.com/heliumdatacommons/CommonsShare_AppStore.git
 
 2) Navigate to the root directory:
 
+```
 CommonsShare_AppStore/              - root 
 ├── CS_AppsStore/                   - Project root
     ├── CS_AppsStore/               - Django root
@@ -16,6 +17,7 @@ CommonsShare_AppStore/              - root
     │   ├── urls.py
     │   └── wsgi.py
     └── manage.py
+```
 
 - Make sure you have virtualenv installed on your system and run the following command to create a virtual environment:
 
