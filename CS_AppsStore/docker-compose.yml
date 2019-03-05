@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+    django-web:
+        build: .
+        # binds the current directory of the host to the container directory.
+        # binds the static files volume on the conatiner to the host. For persistent data.
+        command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --bind :8000 CS_AppsStore.wsgi:application" 
+        volumes:
+            - ./:/usr/src/inst-mgmt/
+            - static_volume:/usr/src/inst-mgmt/staticfiles
+        # A bridge to the connect the Django web to the database and nginx containers.
+        networks:
+            - nginx-network
+            - database1_network
+            - database2_network
+
+    nginx:
+        image: nginx:1.13
+        ports:
+            - 8000:80
+        # binds the nginx config file, cs-certs on the host to the container directory.
+        # binds the static files volume on the container to the host. For persistent data. 
+        volumes:
+            - ./config/nginx/conf.d:/etc/nginx/conf.d
+            - ./config/nginx/cs-certs:/etc/nginx/cs-certs
+            - ./config/nginx/logs:/etc/nginx/logs
+            - static_volume:/usr/src/inst-mgmt/staticfiles
+        # wait for djangoapp to be "ready" before starting this service
+        depends_on:
+            - django-web
+        # A bridge network to connect the Django web and the nginx containers.
+        networks:
+            - nginx-network
+    
+    # Should be the same name as in DATABASES setting, otherwise Django won't find the database
+    database1:
+        image: postgres:10
+        env_file:
+            - config/db/database1_env
+        networks:
+            - database1_network
+        # binds the database volume on the container to the host. For persistent data. 
+        volumes:
+            - database1_volume:/var/lib/postgresql/data
+
+    #Additional database
+    database2:
+        image: postgres:10
+        env_file:
+            - config/db/database2_env
+        networks:
+            - database2_network
+        volumes:
+            - database2_volume:/var/lib/postgresql/data
+
+networks:
+    nginx-network:
+        driver: bridge
+    database1_network:
+        driver: bridge
+    database2_network:
+        driver: bridge
+volumes:
+    database1_volume:
+    database2_volume:
+    static_volume:
