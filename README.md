@@ -129,3 +129,56 @@ The DB name should match with the one specified in the CS_AppsStore/settings.py
     
 
 The "dump.json" is created in the Step-1
+
+# Docker Development
+## Dockerize Django, multiple Postgres databases, NginX, Gunicorn, virtualenv.
+- The Django application is served by Gunicorn (WSGI application).
+- We use NginX as reverse proxy and static files server. Static files persistently stored in volumes.
+- Multiple Postgres databases can be used. Data are persistently stored in volumes.
+- Python dependencies are managed through virtualenv.
+
+## Requirements
+- Install Docker and Docker-Compose
+
+  [Docker CE for Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+  
+  ```sudo apt-get install docker-compose```
+- Include the local_settings.py in the CS_AppStore directory.
+- Include the pivot_hail.json in the pivot_hail/data/ directory.
+- Modify the local_settings.py,
+
+
+    ```DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'database1',
+            'USER': 'postgres',
+            'PASSWORD': '<password>',
+            'HOST': 'database1',  # <-- IMPORTANT: same name as docker-compose service!
+            'PORT': '5432',
+        },
+        'Backup': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'database2',
+            'USER': 'postgres',
+            'PASSWORD': '<password>',
+            'HOST': 'database2',  # <-- IMPORTANT: same name as docker-compose service!
+            'PORT': '5432',
+        },
+    }
+    ```
+    The passwords set here 
+- Add the IP-Address to the list of Allowed Hosts.
+    
+## Build the image and run the containers
+```sudo docker-compose up -d --build```
+
+## To check the logs
+```sudo docker-compose logs -f```
+
+## To update the configuration for NginX and PostgreSql
+The configuration files are available in config/ directory.
+
+## Note
+This Django project is not SSL-enabled
+
