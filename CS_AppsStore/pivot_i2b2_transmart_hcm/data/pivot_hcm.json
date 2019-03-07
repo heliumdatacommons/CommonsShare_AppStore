@@ -1,0 +1,219 @@
+{
+  "id": "hcm",
+  "containers": [
+    {
+      "id": "nginx",
+      "type": "service",
+      "image": "mjstealey/nginx:i2b2tm.release-18.1_i2b2demo",
+      "resources": {
+        "cpus": 2,
+        "mem": 6144,
+        "disk": 6144
+      },
+      "args":
+      [
+        "--addr",
+        "http://vault.commonsshare.org:9200",
+        "--token",
+        "e74495de-e10e-d727-edf5-94dffcc97fc1",
+        "--paths",
+        "secret/hcm/nginx"
+      ],
+      "volumes": [
+        {
+          "container_path": "/etc/nginx/conf.d",
+          "host_path": "/etc/nginx/conf.d",
+          "mode": "RW"
+        }
+      ],
+      "network_mode": "container",
+      "ports": [
+        {
+          "name": "i2b2 TranSMART login",
+          "container_port": 443,
+          "host_port": 18443,
+          "protocol": "tcp"
+        }
+      ],
+      "cloud": "aws-compute",
+      "host": "10.52.0.152",
+      "is_privileged": true,
+      "force_pull_image": true,
+      "dependencies": [
+        "nginx-helper",
+        "transmart"
+      ]
+    },
+    {
+      "id": "transmart",
+      "type": "service",
+      "image": "mjstealey/i2b2transmart:release-18.1-beta-13_i2b2demo",
+      "resources": {
+        "cpus": 2,
+        "mem": 6144,
+        "disk": 6144
+      },
+     "args":
+      [
+        "--addr",
+        "http://vault.commonsshare.org:9200",
+        "--token",
+        "e74495de-e10e-d727-edf5-94dffcc97fc1",
+        "--paths",
+        "secret/hcm/transmart"
+      ],
+      "env": {
+        "I2B2TRANSMART_TITLE": "i2b2 tranSMART / PIVOT",
+        "I2B2TRANSMART_VERSION": "18.1-beta-13",
+        "HIDE_SEARCH": "true",
+        "HIDE_BROWSE": "true",
+        "HIDE_SAMPLE": "true",
+        "HIDE_GENE_SIG": "true",
+        "HIDE_GWAS": "true",
+        "HIDE_UPLOAD": "true",
+        "HIDE_EXPORT": "true",
+        "HIDE_EXPORT_JOBS": "true",
+        "HIDE_ANALYSIS": "true",
+        "HIDE_WORKSPACE": "true",
+        "FRACTALIS_ACTIVE": "false",
+        "FRACTALIS_NODE": "/fractalis",
+        "FRACTALIS_DATA_SOURCE": "https://@nginx/rest/v1",
+        "FRACTALIS_RESOURCE_NAME": "i2b2-wildfly-default/Demo",
+        "I2B2HIVE": "demouser",
+        "I2B2DEMODATA": "demouser",
+        "I2B2METADATA": "demouser",
+        "I2B2PM": "demouser",
+        "I2B2WORKDATA": "demouser",
+        "IRCT_DB_HOST": "irctdb",
+        "IRCT_DB_PORT": "3306",
+        "IRCT_DB_CONNECTION_USER": "root",
+        "IRCT_DB_PASSWORD": "password",
+        "IRCT_USER_FIELD": "aud",
+        "NOTIFICATION_EMAILS": "avillach_lab_developers_at_googlegroups.com",
+        "CONTACT_US": "avillach_lab_developers_at_googlegroups.com",
+        "BUG_REPORT_URL": "https://jira.transmartfoundation.org/projects/I2B2TM",
+        "USER_GUIDE_URL": "http://s3.amazon.com/dbmi-public-docs/i2b2_transmart_userguide.pdf",
+        "PROXY": "@transmart",
+        "PROXY_PORT": "8983",
+        "PROXY_RULE": "^~ /transmart/",
+        "SOLR_NODE": "@solr"
+      },
+      "volumes": [
+        {
+          "container_path": "/tmp",
+          "host_path": "/tmp",
+          "mode": "RW"
+        }
+      ],
+      "network_mode": "container",
+      "cloud": "aws-compute",
+      "host": "10.52.0.36",
+      "is_privileged": true,
+      "dependencies": [
+        "solr",
+        "rserve"
+      ]
+    },
+    {
+      "id": "rserve",
+      "type": "service",
+      "image": "dbmi/rserve:3.2.1-tm.release-18.1",
+      "resources": {
+        "cpus": 1,
+        "mem": 6144,
+        "disk": 6144
+      },
+      "volumes": [
+        {
+          "container_path": "/tmp",
+          "host_path": "/tmp",
+          "mode": "RW"
+        }
+      ],
+      "network_mode": "container",
+      "cloud": "aws-compute",
+      "host": "10.52.0.36",
+      "is_privileged": true
+    },
+    {
+      "id": "solr",
+      "type": "service",
+      "image": "dbmi/solr:4.5.0-tm.release-18.1",
+      "resources": {
+        "cpus": 1,
+        "mem": 6144,
+        "disk": 6144
+      },
+      "env": {
+        "I2B2TRANSMART_TITLE": "i2b2 tranSMART / PIVOT",
+        "I2B2TRANSMART_VERSION": "18.1-beta-13",
+        "HIDE_SEARCH": "true",
+        "HIDE_BROWSE": "true",
+        "HIDE_SAMPLE": "true",
+        "HIDE_GENE_SIG": "true",
+        "HIDE_GWAS": "true",
+        "HIDE_UPLOAD": "true",
+        "HIDE_EXPORT": "true",
+        "HIDE_EXPORT_JOBS": "true",
+        "HIDE_ANALYSIS": "true",
+        "HIDE_WORKSPACE": "true",
+        "FRACTALIS_ACTIVE": "false",
+        "FRACTALIS_NODE": "/fractalis",
+        "FRACTALIS_DATA_SOURCE": "https://@nginx/rest/v1",
+        "FRACTALIS_RESOURCE_NAME": "i2b2-wildfly-default/Demo",
+        "I2B2HIVE": "demouser",
+        "I2B2DEMODATA": "demouser",
+        "I2B2METADATA": "demouser",
+        "I2B2PM": "demouser",
+        "I2B2WORKDATA": "demouser",
+        "IRCT_DB_HOST": "irctdb",
+        "IRCT_DB_PORT": "3306",
+        "IRCT_DB_CONNECTION_USER": "root",
+        "IRCT_DB_PASSWORD": "password",
+        "IRCT_USER_FIELD": "aud",
+        "NOTIFICATION_EMAILS": "avillach_lab_developers_at_googlegroups.com",
+        "CONTACT_US": "avillach_lab_developers_at_googlegroups.com",
+        "BUG_REPORT_URL": "https://jira.transmartfoundation.org/projects/I2B2TM",
+        "USER_GUIDE_URL": "http://s3.amazon.com/dbmi-public-docs/i2b2_transmart_userguide.pdf",
+        "PROXY": "@solr",
+        "PROXY_PORT": "8983",
+        "PROXY_PATH": "/solr"
+      },
+      "network_mode": "container",
+      "cloud": "aws-compute",
+      "host": "10.52.0.36",
+      "is_privileged": true
+    },
+    {
+      "id": "nginx-helper",
+      "type": "service",
+      "image": "mjstealey/nginx-helper:i2b2tm.release-18.1_i2b2demo",
+      "resources": {
+        "cpus": 1,
+        "mem": 1024,
+        "disk": 4096
+      },
+      "env": {
+        "HTTP_PORT": "18080",
+        "HTTPS_PORT": "18443",
+        "SERVER_FQDN_OR_IP": "copdgene3.commonsshare.org",
+        "NGINX_URI": "@nginx",
+        "TRANSMART_URI": "@transmart",
+        "IRCT_URI": "irct",
+        "SOLR_URI": "@solr",
+        "FRACTALIS_URI": "fractalis"
+      },
+      "volumes": [
+        {
+          "container_path": "/etc/nginx/conf.d",
+          "host_path": "/etc/nginx/conf.d",
+          "mode": "RW"
+        }
+      ],
+      "network_mode": "container",
+      "cloud": "aws-compute",
+      "host": "10.52.0.152",
+      "is_privileged": true
+    }
+  ]
+}

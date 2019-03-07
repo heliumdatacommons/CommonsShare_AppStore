@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Select which cloud, AWS or GCP, to deploy i2b2 Transmart HCM appliance or let PIVOT determine the optimal placement</h2>
+        </div>
+    </div>
+</div>
+
+<br/>
+
+<div class="container">
+    {# Cloud Deployment Option #}
+    <div class="form-group">
+        <fieldset>
+            <label for="optCloud" class="col-xs-4">PIVOT Cloud Deployment Option: </label>
+            <select id="optCloud" class="col-xs-8">
+                <option value="optimal">Optimal</option>
+                <option value="aws">AWS</option>
+                <option value="gcp">GCP</option>
+            </select>
+        </fieldset>
+    </div>
+    <div id='pivot-error' class="alert alert-danger" role="alert" hidden></div>
+    <hr>
+    <div class="form-group">
+    <button class="btn btn-success float-left" id="btn-launch-pivot">Launch i2b2 Transmart HCM appliance via PIVOT</button>
+    </div>
+</div>
+
+
+{% block extra_js %}
+    <script type="text/javascript" src="{% static "js/pivot_i2b2_transmart_hcm/pivot_launch.js" %}"></script>
+{% endblock %}
+
+{% endblock %}

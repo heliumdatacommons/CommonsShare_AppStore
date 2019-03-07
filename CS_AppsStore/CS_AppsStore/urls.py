@@ -30,4 +30,6 @@ urlpatterns = [
 urlpatterns += [
     url('^pivot_hail/', include('pivot_hail.urls')),
     url('^phenotype/', include('phenotype.urls')),
+    url('^pivot_i2b2_transmart_copdgene/', include('pivot_i2b2_transmart_copdgene.urls')),
+    url('^pivot_i2b2_transmart_hcm/', include('pivot_i2b2_transmart_hcm.urls')),
 ]

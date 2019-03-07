@@ -1,0 +1,1 @@
+default_app_config = 'pivot_i2b2_transmart_hcm.apps.PivotI2B2TransmartHcmConfig'

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'pivot_orchestration_service',
     'pivot_hail',
     'phenotype',
+    'pivot_i2b2_transmart_copdgene',
+    'pivot_i2b2_transmart_hcm',
 ]
 
 
