@@ -88,8 +88,9 @@ def deploy(request):
         return JsonResponse(status=HTTP_200_OK, data={'url': redirect_url})
 
     except PIVOTResourceException as ex:
-        err_msg = ex.message + 'Please check <a href="/pivot_hail/status/">HAIL cluster current ' \
-                              'usage status</a> to see who are currently using HAIL cluster.'
+        err_msg = ex.message + 'Please check <a href="/pivot_hail/status/">' \
+                               'PIVOT cluster current usage status</a> to see who are currently ' \
+                               'using the PIVOT cluster.'
         return JsonResponse(data={'error': err_msg},
                             status=HTTP_400_BAD_REQUEST)
 
@@ -127,6 +128,6 @@ def status(request):
     try:
         context = get_running_appliances_usage_status('pivot_hail.models', 'HailStatus',
                                                       request_url=url)
-        return render(request, "pivot_hail/status.html", context)
+        return render(request, "pivot_orchestration_service/status.html", context)
     except (ImportError, ValidationError) as ex:
         return HttpResponseServerError(ex.message)

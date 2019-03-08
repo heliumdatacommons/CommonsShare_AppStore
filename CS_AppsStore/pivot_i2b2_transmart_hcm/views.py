@@ -7,12 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.core.exceptions import ValidationError
 
-from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR
+from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
 
 from pivot_i2b2_transmart_hcm.models import TransmartHCMConfig
 from apps_core_services.utils import check_authorization
 from pivot_orchestration_service.utils import validate_id, \
-    deploy_appliance, PIVOTException
+    deploy_appliance, PIVOTException, PIVOTResourceException
 
 # Create your views here.
 
@@ -67,9 +67,17 @@ def deploy(request):
             con['rack'] = cluster_name
 
     try:
-        redirect_url = deploy_appliance(conf_data, check_res_avail=False)
+        redirect_url = deploy_appliance(conf_data, check_res_avail=True)
         # new appliance has been created successfully
         return JsonResponse(status=HTTP_200_OK, data={'url': redirect_url})
+
+    except PIVOTResourceException as ex:
+        err_msg = ex.message + 'Please check <a href="/pivot_orchestration_service/status/">' \
+                               'PIVOT cluster current usage status</a> to see who are currently ' \
+                               'using the PIVOT cluster.'
+
+        return JsonResponse(data={'error': err_msg},
+                            status=HTTP_400_BAD_REQUEST)
 
     except PIVOTException as ex:
         return JsonResponse(data={'error': ex.message},
