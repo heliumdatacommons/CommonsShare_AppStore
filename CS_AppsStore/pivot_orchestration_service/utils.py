@@ -65,33 +65,67 @@ def deploy_appliance(config_data, check_res_avail=False):
             return_data = response.json()
             avail_cpus = 0
             avail_mems = 0
-            for cluster in return_data:
-                avail_cpus += cluster['resources']['cpus']
-                avail_mems += cluster['resources']['mem']
+            avail_max_cpus = 0
+            avail_max_mems = 0
+            for host in return_data:
+                avail_cpus += host['resources']['cpus']
+                avail_mems += host['resources']['mem']
+                if host['resources']['cpus'] > avail_max_cpus:
+                    avail_max_cpus = host['resources']['cpus']
+                if host['resources']['mem'] > avail_max_mems:
+                    avail_max_mems = host['resources']['mem']
 
             if avail_cpus < 1 or avail_mems < 1000:
                 raise PIVOTResourceException('There are no resource available at the moment')
 
             # get requested cpus and mems
             for con in config_data['containers']:
-                if con['id'] == 'workers':
-                    num_insts = con['instances']
-                    num_cpus = con['resources']['cpus']
-                    mem_size = con['resources']['mem']
+                if 'resources' in con:
+                    req_cpus = settings.INITIAL_COST_CPU + con['resources']['cpus']
+                    req_mem = settings.INITIAL_COST_MEM + con['resources']['mem']
+                    if con['id'] == 'workers':
+                        num_insts = con['instances']
+                    else:
+                        num_insts = 1
+                    for i in range(num_insts):
+                        if con['id'] == 'workers' and (req_cpus > avail_max_cpus or
+                                                               req_mem > avail_max_mems):
+                            # there are not enough resources, notify users to reduce number of
+                            # requested resources
+                            err_msg = 'There are not enough resources available. Please reduce ' \
+                                      'number of instances and resources requested to be within ' \
+                                      'our available resource pool ({} CPUs and {}MB memory ' \
+                                      'available at the moment).'
+                            a_cpus = int(avail_max_cpus)
+                            a_mems = int(avail_max_mems)
+                            raise PIVOTResourceException(err_msg.format(a_cpus, a_mems))
 
-                    req_cpus = settings.INITIAL_COST_CPU + int(num_cpus) * int(num_insts)
-                    req_mem = settings.INITIAL_COST_MEM + int(mem_size) * int(num_insts)
-
-                    if req_cpus > avail_cpus or req_mem > avail_mems:
-                        # there are not enough resources, notify users to reduce number of
-                        # requested resources
-                        err_msg = 'There are not enough resources available. Please reduce ' \
-                                  'number of instances and resources requested to be within ' \
-                                  'our available resource pool ({} CPUs and {}MB memory ' \
-                                  'available at the moment).'
-                        a_cpus = int(avail_cpus)
-                        a_mems = int(avail_mems)
-                        raise PIVOTResourceException(err_msg.format(a_cpus, a_mems))
+                        resource_checked = False
+                        for host in return_data:
+                            avail_cpus_host = host['resources']['cpus']
+                            avail_mems_host = host['resources']['mem']
+                            if req_cpus <= avail_cpus_host and req_mem <= avail_mems_host:
+                                # deduct the requested resource from available resource pool and
+                                # break out host check to continue with next container check
+                                host['resources']['cpus'] -= req_cpus
+                                host['resources']['mem'] -= req_mem
+                                resource_checked = True
+                                break
+                        if not resource_checked:
+                            if con['id'] == 'workers':
+                                # there are not enough resources, notify users to reduce number of
+                                # requested resources
+                                err_msg = 'There are not enough resources available. Please reduce ' \
+                                          'number of instances and resources requested and try ' \
+                                          'again.'
+                                raise PIVOTResourceException(err_msg)
+                            else:
+                                # there are not enough resources, notify users to reduce number of
+                                # requested resources
+                                err_msg = 'There are not enough resources available. Please ' \
+                                          'email protocopdgenehelp@lists.renci.org to get ' \
+                                          'more details on the resource availability.'
+                                raise PIVOTResourceException(err_msg)
 
                     break
 
