@@ -2,13 +2,14 @@ import re
 from json import dumps
 import requests
 import time
-from importlib import import_module
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_200_OK, \
     HTTP_201_CREATED
 
 from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+from pivot_orchestration_service.models import ApplianceStatus
 
 
 class PIVOTResourceException(Exception):
@@ -44,22 +45,21 @@ def validate_id(id_in):
     return
 
 
-def deploy_appliance(config_data, check_res_avail=False):
+def deploy_appliance(config_data):
     """
     deploy appliance via PIVOT API
     :param config_data: appliance configuration data dict to send to PIVOT
-    :param check_res_avail: optional with default being False indicating whether to check
-    resource availability before requesting PIVOT to deploy the appliance
-    :return: (True, redirect_url) upon success or raise PIVOTResourceException or PIVOTException
-    upon failure
+    :return: (redirect_url, cpus_consumed, mem_consumed) upon success or
+    raise PIVOTResourceException or PIVOTException upon failure
     """
     # check if appliance already exists, if yes, do redirect directly, if not, create a new one
-    url = settings.PIVOT_URL + 'appliance'
-    app_id = config_data['id']
-    app_url = url + '/' + app_id
-    get_response = requests.get(app_url)
-    if get_response.status_code == HTTP_404_NOT_FOUND:
-        if check_res_avail:
+    try:
+        url = settings.PIVOT_URL + 'appliance'
+        app_id = config_data['id']
+        app_url = url + '/' + app_id
+        get_response = requests.get(app_url)
+        redirect_url = app_url + '/ui'
+        if get_response.status_code == HTTP_404_NOT_FOUND:
             # check whether there are enough resources available to create requested appliance
             response = requests.get(settings.PIVOT_URL + 'cluster')
             return_data = response.json()
@@ -67,7 +67,20 @@ def deploy_appliance(config_data, check_res_avail=False):
             avail_mems = 0
             avail_max_cpus = 0
             avail_max_mems = 0
+
+            initial_cpu_cost_counted = False
+            initial_mem_cost_counted = False
             for host in return_data:
+
+                if not initial_cpu_cost_counted:
+                    if host['resources']['cpus'] > settings.INITIAL_COST_CPU:
+                        host['resources']['cpus'] -= settings.INITIAL_COST_CPU
+                        initial_cpu_cost_counted = True
+                if not initial_mem_cost_counted:
+                    if host['resources']['mem'] > settings.INITIAL_COST_MEM:
+                        host['resources']['mem'] -= settings.INITIAL_COST_MEM
+                        initial_mem_cost_counted = True
+
                 avail_cpus += host['resources']['cpus']
                 avail_mems += host['resources']['mem']
                 if host['resources']['cpus'] > avail_max_cpus:
@@ -78,11 +91,15 @@ def deploy_appliance(config_data, check_res_avail=False):
             if avail_cpus < 1 or avail_mems < 1000:
                 raise PIVOTResourceException('There are no resource available at the moment')
 
+            total_req_cpus = settings.INITIAL_COST_CPU
+            total_req_mem = settings.INITIAL_COST_MEM
             # get requested cpus and mems
             for con in config_data['containers']:
                 if 'resources' in con:
-                    req_cpus = settings.INITIAL_COST_CPU + con['resources']['cpus']
-                    req_mem = settings.INITIAL_COST_MEM + con['resources']['mem']
+                    req_cpus = con['resources']['cpus']
+                    req_mem = con['resources']['mem']
+                    total_req_cpus += req_cpus
+                    total_req_mem += req_mem
                     if con['id'] == 'workers':
                         num_insts = con['instances']
                     else:
@@ -127,55 +144,36 @@ def deploy_appliance(config_data, check_res_avail=False):
                                           'more details on the resource availability.'
                                 raise PIVOTResourceException(err_msg)
 
-                    break
-
-        # request to create the appliance
-        response = requests.post(url, data=dumps(config_data))
-        if response.status_code == HTTP_409_CONFLICT:
-            time.sleep(2)
+            # request to create the appliance
             response = requests.post(url, data=dumps(config_data))
+            if response.status_code == HTTP_409_CONFLICT:
+                time.sleep(2)
+                response = requests.post(url, data=dumps(config_data))
 
-        if response.status_code != HTTP_200_OK and \
-                        response.status_code != HTTP_201_CREATED:
-            raise PIVOTException(response.text)
+            if response.status_code != HTTP_200_OK and \
+                            response.status_code != HTTP_201_CREATED:
+                raise PIVOTException(response.text)
 
-    # success, return redirct_url
-    redirect_url = app_url + '/ui'
-    return redirect_url
+            # success, return redirct_url
+            return redirect_url, total_req_cpus, total_req_mem
+        else:
+            # appliance already exists, no additional resource is requested
+            return redirect_url, -1, -1
+    except Exception as ex:
+        raise PIVOTException(ex)
 
 
-def get_running_appliances_usage_status(status_module_path, status_module_class, request_url=''):
+def get_running_appliances_usage_status(request_url=''):
     """
-    return usage status of all running appliances by querying the status module class input.
-    The status module class must inherit from the abstract ApplianceStatus model which defines
+    return usage status of all running appliances by querying ApplianceStatus model which defines
     required fields that apply to all PIVOT appliances. These fields are:
-    user, appliance_id, status, start_timestamp, end_timestamp. The specific status module class
-    can include additional fields that pertain to its specific needs. For example, HAIL cluster
-    appliance status model includes additional memory, cpus, insts fields which represent resources
-    that will be allocated for the appliance.
-    :param status_module_path: the path to be used to import the module
-    :param status_module_class: the class name to load from the module
+    user, appliance_id, status, start_timestamp, end_timestamp, cpus, and memory.
     :param request_url: optional parameter to check whether appliance has been deleted or not
     :return: context dictionary upon success and raise ImportError or ValidationError upon failure
     """
-    try:
-        status_module = import_module(status_module_path)
-    except ImportError as ex:
-        raise ImportError('module cannot be imported: ' + ex.message)
-
-    status_model = getattr(status_module, status_module_class)
-    fields = []
-    for field in status_model._meta.fields:
-        fields.append(field.name)
-
-    if 'user' not in fields or 'appliance_id' not in fields or 'status' not in fields or \
-            'start_timestamp' not in fields or 'end_timestamp' not in fields:
-        raise ValidationError('status model does not have required fields user, appliance_id, '
-                              'status, start_timestamp, or end_timestamp')
-
     context = {'usage_list': []}
 
-    for obj in status_model.objects.filter(status='R'):
+    for obj in ApplianceStatus.objects.filter(status='R'):
         # check whether the appliance is really running since the appliance could be deleted
         # in PIVOT
         if request_url:
@@ -194,9 +192,8 @@ def get_running_appliances_usage_status(status_module_path, status_module_class,
                     'user_email': obj.user.email,
                     'appliance_id': obj.appliance_id,
                     'start_timestamp': obj.start_timestamp,
-                    'insts': obj.insts if 'insts' in fields else None,
-                    'memory': obj.memory if 'memory' in fields else None,
-                    'cpus': obj.cpus if 'cpus' in fields else None,
+                    'memory': obj.memory,
+                    'cpus': obj.cpus,
                 })
         else:
             # no need to check on whether appliance is live, just assume it is live
@@ -206,9 +203,8 @@ def get_running_appliances_usage_status(status_module_path, status_module_class,
                 'user_email': obj.user.email,
                 'appliance_id': obj.appliance_id,
                 'start_timestamp': obj.start_timestamp,
-                'insts': obj.insts if 'insts' in fields else None,
-                'memory': obj.memory if 'memory' in fields else None,
-                'cpus': obj.cpus if 'cpus' in fields else None,
+                'memory': obj.memory,
+                'cpus': obj.cpus,
             })
 
     return context

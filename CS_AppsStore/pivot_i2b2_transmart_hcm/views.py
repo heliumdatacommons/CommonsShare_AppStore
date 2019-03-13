@@ -6,11 +6,13 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
 
 from pivot_i2b2_transmart_hcm.models import TransmartHCMConfig
 from apps_core_services.utils import check_authorization
+from pivot_orchestration_service.models import ApplianceStatus
 from pivot_orchestration_service.utils import validate_id, \
     deploy_appliance, PIVOTException, PIVOTResourceException
 
@@ -67,12 +69,22 @@ def deploy(request):
             con['rack'] = cluster_name
 
     try:
-        redirect_url = deploy_appliance(conf_data, check_res_avail=True)
-        # new appliance has been created successfully
+        redirect_url, total_req_cpus, total_req_mem = deploy_appliance(conf_data)
+        if total_req_mem > 0 and total_req_mem > 0:
+            # new appliance has been created successfully, record new entry into
+            # status table and make sure status of the existing running appliance get updated from
+            # running to deleted
+            curr_time = timezone.now()
+            old_appl = ApplianceStatus.objects.filter(user=user, appliance_id=app_id, status='R')
+            if old_appl:
+                old_appl.update(status='D', end_timestamp=curr_time)
+            ApplianceStatus.objects.create(user=user, appliance_id=app_id, status='R',
+                                           memory=total_req_mem, cpus=total_req_cpus,
+                                           start_timestamp=curr_time)
         return JsonResponse(status=HTTP_200_OK, data={'url': redirect_url})
 
     except PIVOTResourceException as ex:
-        err_msg = ex.message + 'Please check <a href="/pivot_orchestration_service/status/">' \
+        err_msg = ex.message + 'Please check <a href="/pivot/status/">' \
                                'PIVOT cluster current usage status</a> to see who are currently ' \
                                'using the PIVOT cluster.'
 

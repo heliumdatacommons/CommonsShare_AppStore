@@ -3,7 +3,6 @@ from django.db import models
 # Create your models here.
 
 from django.contrib.auth.models import User
-from django.db import models
 
 # Create your models here.
 
@@ -24,6 +23,9 @@ class ApplianceStatus(models.Model):
     start_timestamp = models.DateTimeField(null=True, blank=True)
     end_timestamp = models.DateTimeField(null=True, blank=True)
 
+    cpus = models.PositiveIntegerField(null=True, blank=True)
+    # in MB unit
+    memory = models.PositiveIntegerField(null=True, blank=True)
+
     class Meta:
-        abstract = True
         unique_together = ("user", "appliance_id", "status", "start_timestamp", "end_timestamp")

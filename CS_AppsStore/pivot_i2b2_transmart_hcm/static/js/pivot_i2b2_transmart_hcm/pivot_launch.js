@@ -8,7 +8,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "POST",
-            url: "/pivot_i2b2_transmart_copdgene/deploy/",
+            url: "/pivot_i2b2_transmart_hcm/deploy/",
             dataType: "json",
             data: {
                 'opt_cloud': opt_cloud
