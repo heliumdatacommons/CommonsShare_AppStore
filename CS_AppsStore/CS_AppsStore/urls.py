@@ -28,6 +28,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
+    url('^pivot/', include('pivot_orchestration_service.urls')),
     url('^pivot_hail/', include('pivot_hail.urls')),
     url('^phenotype/', include('phenotype.urls')),
     url('^pivot_i2b2_transmart_copdgene/', include('pivot_i2b2_transmart_copdgene.urls')),

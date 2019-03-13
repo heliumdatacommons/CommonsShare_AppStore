@@ -3,19 +3,19 @@ import hashlib
 from django.contrib import messages
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseServerError
+from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
     HTTP_400_BAD_REQUEST
 
-from pivot_hail.models import HailConfig, HailStatus
+from pivot_hail.models import HailConfig
 from pivot_hail.utils import get_hail_start_context
 from apps_core_services.utils import check_authorization
+from pivot_orchestration_service.models import ApplianceStatus
 from pivot_orchestration_service.utils import validate_id, \
-    get_running_appliances_usage_status, deploy_appliance, PIVOTException, PIVOTResourceException
+    deploy_appliance, PIVOTException, PIVOTResourceException
 
 
 # Create your views here.
@@ -75,21 +75,25 @@ def deploy(request):
                 con['env']['JUPYTER_TOKEN'] = token
 
     try:
-        redirect_url = deploy_appliance(conf_data, check_res_avail=True)
-        # new appliance has been created successfully, record new entry into hail cluster
-        # status table and make sure status of the existing running appliance get updated from
-        # running to deleted
-        curr_time = timezone.now()
-        HailStatus.objects.filter(user=user, appliance_id=app_id, status='R'). \
-            update(status='D', end_timestamp=curr_time)
-        HailStatus.objects.create(user=user, appliance_id=app_id, status='R',
-                                  insts=num_insts, memory=mem_size, cpus=num_cpus,
-                                  start_timestamp=curr_time)
+        redirect_url, total_req_cpus, total_req_mem = deploy_appliance(conf_data)
+        if total_req_mem > 0 and total_req_mem > 0:
+            # new appliance has been created successfully, record new entry into hail cluster
+            # status table and make sure status of the existing running appliance get updated from
+            # running to deleted
+            curr_time = timezone.now()
+            old_appl = ApplianceStatus.objects.filter(user=user, appliance_id=app_id, status='R')
+            if old_appl:
+                old_appl.update(status='D', end_timestamp=curr_time)
+            ApplianceStatus.objects.create(user=user, appliance_id=app_id, status='R',
+                                           memory=total_req_mem, cpus=total_req_cpus,
+                                           start_timestamp=curr_time)
+
         return JsonResponse(status=HTTP_200_OK, data={'url': redirect_url})
 
     except PIVOTResourceException as ex:
-        err_msg = ex.message + 'Please check <a href="/pivot_hail/status/">HAIL cluster current ' \
-                              'usage status</a> to see who are currently using HAIL cluster.'
+        err_msg = ex.message + 'Please check <a href="/pivot/status/">' \
+                               'PIVOT cluster current usage status</a> to see who are currently ' \
+                               'using the PIVOT cluster.'
         return JsonResponse(data={'error': err_msg},
                             status=HTTP_400_BAD_REQUEST)
 
@@ -119,14 +123,3 @@ def start(request):
     else:
         # this is needed to strip out access token from URL
         return HttpResponseRedirect("/pivot_hail/login_start/")
-
-
-@login_required()
-def status(request):
-    url = settings.PIVOT_URL + 'appliance/'
-    try:
-        context = get_running_appliances_usage_status('pivot_hail.models', 'HailStatus',
-                                                      request_url=url)
-        return render(request, "pivot_hail/status.html", context)
-    except (ImportError, ValidationError) as ex:
-        return HttpResponseServerError(ex.message)
