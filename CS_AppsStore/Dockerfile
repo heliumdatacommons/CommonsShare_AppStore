@@ -8,6 +8,9 @@ WORKDIR /usr/src/inst-mgmt
 
 #Install pycopg2 for postgresql.
 RUN pip install psycopg2~=2.6
+RUN apt-get update 
+RUN apt-get install -y postgresql-client
+
 
 # Install Virtual Environment
 RUN pip install --upgrade pip
