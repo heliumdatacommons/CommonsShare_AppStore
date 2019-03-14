@@ -5,4 +5,9 @@ CS_AppsStore/CS_AppsStore/local_settings.py
 CS_AppsStore/pivot_hail/data/
 CS_AppsStore/CS_AppsStore/__pycache__
 venv/
-
+CS_AppsStore/config/nginx/cs-certs/
+CS_AppsStore/config/nginx/logs/
+CS_AppsStore/config/nginx/snippets/
+CS_AppsStore/config/db/database2_env/
+CS_AppsStore/CS_AppsStore/local_settings_docker.py
+CS_AppsStore/CS_AppsStore/local_settings_venv.py
