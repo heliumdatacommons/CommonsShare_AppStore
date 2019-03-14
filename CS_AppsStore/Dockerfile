@@ -18,7 +18,7 @@ RUN /bin/bash -c "source /usr/src/inst-mgmt/venv/bin/activate"
 RUN pip install -r /usr/src/inst-mgmt/requirements.txt
 
 EXPOSE 8000
-
+EXPOSE 5432
 COPY . /usr/src/inst-mgmt
 
 #CMD ["gunicorn", "--bind", ":8000", "CS_AppsStore.wsgi:application"]

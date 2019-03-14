@@ -2,30 +2,34 @@ version: '3'
 
 services:
     django-web:
+        restart: always
         build: .
         # binds the current directory of the host to the container directory.
         # binds the static files volume on the conatiner to the host. For persistent data.
-        command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --bind :8000 CS_AppsStore.wsgi:application" 
+        command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application" 
         volumes:
-            - ./:/usr/src/inst-mgmt/
-            - static_volume:/usr/src/inst-mgmt/staticfiles
+            #- ./:/usr/src/inst-mgmt/
+            - static_volume:/usr/src/inst-mgmt/static
         # A bridge to the connect the Django web to the database and nginx containers.
         networks:
             - nginx-network
             - database1_network
-            - database2_network
+            #- database2_network
+        depends_on:
+            - db1
+            #- db2
 
     nginx:
         image: nginx:1.13
+        #command: apt-get update && apt-get install sudo && sudo ln -s /etc/nginx/sites-available/appstore /etc/nginx/sites-enabled/appstore
         ports:
-            - 8000:80
+            - "80:80"
+            - "443:443"
         # binds the nginx config file, cs-certs on the host to the container directory.
         # binds the static files volume on the container to the host. For persistent data. 
         volumes:
-            - ./config/nginx/conf.d:/etc/nginx/conf.d
-            - ./config/nginx/cs-certs:/etc/nginx/cs-certs
-            - ./config/nginx/logs:/etc/nginx/logs
-            - static_volume:/usr/src/inst-mgmt/staticfiles
+            - ./config/nginx/:/etc/nginx/
+            - static_volume:/usr/src/inst-mgmt/static
         # wait for djangoapp to be "ready" before starting this service
         depends_on:
             - django-web
@@ -34,7 +38,7 @@ services:
             - nginx-network
     
     # Should be the same name as in DATABASES setting, otherwise Django won't find the database
-    database1:
+    db1:
         image: postgres:10
         env_file:
             - config/db/database1_env
@@ -42,26 +46,26 @@ services:
             - database1_network
         # binds the database volume on the container to the host. For persistent data. 
         volumes:
-            - database1_volume:/var/lib/postgresql/data
+            - database1_volume:/var/lib/docker/postgresql/data
 
     #Additional database
-    database2:
-        image: postgres:10
-        env_file:
-            - config/db/database2_env
-        networks:
-            - database2_network
-        volumes:
-            - database2_volume:/var/lib/postgresql/data
+    #db2:
+    #    image: postgres:10
+    #    env_file:
+    #        - config/db/database2_env
+    #    networks:
+    #        - database2_network
+    #    volumes:
+    #        - database2_volume:/home/postgresql/data
 
 networks:
     nginx-network:
         driver: bridge
     database1_network:
         driver: bridge
-    database2_network:
-        driver: bridge
+    #database2_network:
+    #    driver: bridge
 volumes:
     database1_volume:
-    database2_volume:
+    #database2_volume:
     static_volume:
