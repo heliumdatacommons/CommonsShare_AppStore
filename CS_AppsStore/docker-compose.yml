@@ -1,5 +1,6 @@
 version: '3'
 
+#Define your services.
 services:
     django-web:
         restart: always
@@ -8,7 +9,7 @@ services:
         # binds the static files volume on the conatiner to the host. For persistent data.
         command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application" 
         volumes:
-            #- ./:/usr/src/inst-mgmt/
+            - ./:/usr/src/inst-mgmt/
             - static_volume:/usr/src/inst-mgmt/static
         # A bridge to the connect the Django web to the database and nginx containers.
         networks:
