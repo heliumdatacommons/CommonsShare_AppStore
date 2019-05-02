@@ -79,7 +79,8 @@ def check_authorization(request):
 
     if not skip_validate:
         # need to check the token validity
-        validate_url = 'https://auth.commonsshare.org/validate_token?access_token='
+        auth_url = settings.OAUTH_SERVICE_SERVER_URL
+        validate_url = auth_url + 'validate_token?access_token='
         resp = requests.get(validate_url + token)
         if resp.status_code == 200:
             body = json.loads(resp.content.decode('utf-8'))
