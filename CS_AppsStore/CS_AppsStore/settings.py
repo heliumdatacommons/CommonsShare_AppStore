@@ -27,8 +27,11 @@ SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['34.197.171.203',
-                 'apps.commonsshare.org',
+ALLOWED_HOSTS = [
+                 '.commonsshare.org',  # Allow domain and subdomains
+                 '.commonsshare.org.',  # Also allow FQDN and subdomains
+                 '.renci.org',  # Allow domain and subdomains
+                 '.renci.org.',  # Also allow FQDN and subdomains
                  'localhost']
 
 
