@@ -2,7 +2,6 @@ FROM python:3.6
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-
 #Switch the working directory.
 WORKDIR /usr/src/inst-mgmt
 
