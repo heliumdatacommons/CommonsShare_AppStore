@@ -7,11 +7,18 @@ services:
         build: .
         # binds the current directory of the host to the container directory.
         # binds the static files volume on the conatiner to the host. For persistent data.
-        command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application" 
+        command: > 
+            bash -c "python -m compileall -b /usr/src/inst-mgmt/ &&
+                     python manage.py makemigrations && 
+                     python manage.py migrate && 
+                     python manage.py collectstatic --no-input && 
+                     gunicorn --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application" 
         volumes:
             - ./:/usr/src/inst-mgmt/
             - static_volume:/usr/src/inst-mgmt/static
         # A bridge to the connect the Django web to the database and nginx containers.
+        ports:
+            - "8000:8000"
         networks:
             - nginx-network
             - database1_network
