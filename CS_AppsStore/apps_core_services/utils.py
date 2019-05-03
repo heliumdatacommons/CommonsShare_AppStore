@@ -40,7 +40,7 @@ def get_auth_redirect(request):
     # can be the url of the current app, since check_authorization will check for it
     # right now this is restricted to domains matching '*.commonsshare.org'
     return_url = '&return_to={}://{}/apps'.format(request.scheme, request.get_host())
-    url = '{}authorize?provider=globus'.format(settings.OAUTH_SERVICE_SERVER_URL)
+    url = '{}authorize?provider=auth0'.format(settings.OAUTH_SERVICE_SERVER_URL)
     url += '&scope=openid%20profile%20email'
     url += return_url
     auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
