@@ -6,4 +6,4 @@ class PhenotypeConfig(AppConfig):
     name = 'phenotype'
     verbose_name = "Analyze Phenotype"
     url = settings.PHENOTYPE_REDIRECT_URL
-    logo = 'images/carousel-monarch.png'
+    logo = 'img/carousel-monarch.png'

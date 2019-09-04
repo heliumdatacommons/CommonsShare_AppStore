@@ -33,4 +33,6 @@ urlpatterns += [
     url('^phenotype/', include('phenotype.urls')),
     url('^pivot_i2b2_transmart_copdgene/', include('pivot_i2b2_transmart_copdgene.urls')),
     url('^pivot_i2b2_transmart_hcm/', include('pivot_i2b2_transmart_hcm.urls')),
+    url('^tycho_jupyter/', include('tycho_jupyter.urls')),
+    url('^tycho_nextflow/', include('tycho_nextflow.urls')),
 ]
