@@ -7,11 +7,11 @@ from django.http import HttpResponseRedirect
 
 def deploy():
 
-    client_factory = TychoClientFactory()
+    #client_factory = TychoClientFactory()
     #client = client_factory.get_client()
 
     #client = TychoClient("http://localhost:5000")
-    client = TychoClient("http://35.199.30.174:8099")
+    client = TychoClient("http://34.74.182.21:8099")
 
     base_dir = os.path.dirname(os.path.dirname(__file__))
     data_dir = os.path.join(base_dir, "tycho_nextflow", "data")
@@ -42,6 +42,7 @@ def deploy():
              }
     }
 
+    print(request)
     tycho_system = client.start(request)
 
     guid = tycho_system.identifier

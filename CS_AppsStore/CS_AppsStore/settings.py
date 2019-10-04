@@ -25,7 +25,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
                  '.commonsshare.org',  # Allow domain and subdomains
@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'phenotype',
     'pivot_i2b2_transmart_copdgene',
     'pivot_i2b2_transmart_hcm',
+    'tycho_jupyter',
+    'tycho_nextflow',
 ]
 
 
@@ -95,9 +97,7 @@ WSGI_APPLICATION = 'CS_AppsStore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-
-}
+DATABASES = {}
 
 
 LOGIN_URL = '/'

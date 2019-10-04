@@ -1,19 +1,19 @@
 version: "3.0"
 services:
   nextflow:
-    image: bentsherman/nextflow-gke
+    image: bentsherman/nextflow-api
     env:
       - NEXTFLOW_K8S=true
     entrypoint:
       - /bin/bash
       - -c
-      - cd /opt/nextflow-gke; python3 server.py
+      - cd /opt/nextflow-api; python3 server.py
     ports:
       - $HOST_PORT:8080
     volumes:
-      - $LOCAL_STORE:/workspace
+      - TYCHO_NFS/deepgtex-prp:/workspace
     deploy:
       resources:
         limits:
-          cpus: 1
+          gpus: 1
           memory: 4Gi

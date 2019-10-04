@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.7
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -15,9 +15,15 @@ RUN apt-get install -y postgresql-client
 RUN pip install --upgrade pip
 RUN pip install virtualenv
 COPY ./requirements.txt /usr/src/inst-mgmt/requirements.txt
+COPY ./tycho_api-0.0.5-py3-none-any.whl /usr/src/inst-mgmt/tycho_api-0.0.5-py3-none-any.whl
 RUN virtualenv /usr/src/inst-mgmt/venv
 RUN /bin/bash -c "source /usr/src/inst-mgmt/venv/bin/activate"
 RUN pip install -r /usr/src/inst-mgmt/requirements.txt
+RUN pip install /usr/src/inst-mgmt/tycho_api-0.0.5-py3-none-any.whl
+RUN pip install pyyaml
+RUN pip install netifaces 
+RUN pip install jinja2 
+RUN pip install kubernetes 
 
 EXPOSE 8000
 EXPOSE 5432

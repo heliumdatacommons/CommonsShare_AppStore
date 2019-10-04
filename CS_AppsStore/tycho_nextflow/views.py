@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from apps_core_services.utils import check_authorization
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render
@@ -16,6 +17,7 @@ def login_start(request):
     # view function when the start action is triggered from CommonsShare Apps Store from
     # which the user has already logged in to CommonsShare Apps Store directly
     redirect_url = deploy(request)
+    messages.success(request, 'Launching Nextflow')
     return HttpResponseRedirect(redirect_url)
 
 
