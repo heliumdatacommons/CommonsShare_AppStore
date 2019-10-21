@@ -10,7 +10,6 @@ def deploy():
     #client_factory = TychoClientFactory()
     #client = client_factory.get_client()
 
-    #client = TychoClient("http://localhost:5000")
     client = TychoClient("http://34.74.182.21:8099")
 
     base_dir = os.path.dirname(os.path.dirname(__file__))

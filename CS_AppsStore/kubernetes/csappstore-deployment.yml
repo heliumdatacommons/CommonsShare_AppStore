@@ -1,10 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cs-appstore 
   labels:
     app: cs-appstore 
 spec:
+  selector:
+    matchLabels:
+      app: cs-appstore 
   #replicas: 3
   template:
     metadata:
@@ -50,7 +53,7 @@ spec:
         ports:
         - containerPort: 8000
         volumeMounts:
-        - mountPath: /usr/src/inst-mgmt/static
+        - mountPath: /data
           name: static-volume
       restartPolicy: Always
       volumes:
