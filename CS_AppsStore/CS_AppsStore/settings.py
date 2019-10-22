@@ -33,7 +33,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,7 +59,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -158,10 +156,3 @@ INITIAL_COST_MEM = 6 # in MB
 # phenotype specific settings
 PHENOTYPE_REDIRECT_URL = "https://monarchinitiative.org/analyze/phenotypes"
 # Other APPs specific settings can go here
-
-#########################
-#  CORS/OAUTH SETTINGS  #
-#########################
-
-# TODO: change this to the actual origins we wish to support
-CORS_ORIGIN_ALLOW_ALL = True
