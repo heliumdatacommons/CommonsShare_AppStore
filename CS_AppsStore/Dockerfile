@@ -23,7 +23,8 @@ RUN pip install /usr/src/inst-mgmt/tycho_api-0.0.5-py3-none-any.whl
 RUN pip install pyyaml
 RUN pip install netifaces 
 RUN pip install jinja2 
-RUN pip install kubernetes 
+RUN pip install kubernetes
+RUN pip install django-cors-headers
 
 EXPOSE 8000
 EXPOSE 5432

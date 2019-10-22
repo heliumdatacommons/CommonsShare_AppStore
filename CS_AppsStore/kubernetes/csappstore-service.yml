@@ -5,11 +5,9 @@ metadata:
   labels:
     app: cs-appstore
 spec:
-  type: NodePort 
+  type: LoadBalancer 
   ports:
-  - protocol: "TCP"
-    port: 8000
+  - port: 8000
     targetPort: 8000
-    nodePort: 30002
   selector:
     app: cs-appstore
