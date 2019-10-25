@@ -24,7 +24,6 @@ RUN pip install pyyaml
 RUN pip install netifaces 
 RUN pip install jinja2 
 RUN pip install kubernetes
-RUN pip install django-cors-headers
 RUN pip install requests
 
 EXPOSE 8000

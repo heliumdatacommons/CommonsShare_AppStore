@@ -25,7 +25,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -35,7 +35,6 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'corsheaders',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -57,7 +56,6 @@ SITE_ID = 4
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -120,13 +118,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
 
 STATIC_URL = '/static/'
-STATICFILES_FINDERS = ["django.contrib.staticfiles.finders.FileSystemFinder",
- "django.contrib.staticfiles.finders.AppDirectoriesFinder"]
 STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL.strip("/"))
 
 # PIVOT HAIL APP specific settings
@@ -135,11 +132,3 @@ INITIAL_COST_MEM = 6 # in MB
 
 # phenotype specific settings
 PHENOTYPE_REDIRECT_URL = "https://monarchinitiative.org/analyze/phenotypes"
-# Other APPs specific settings can go here
-
-#########################
-#  CORS/OAUTH SETTINGS  #
-#########################
-
-# TODO: change this to the actual origins we wish to support
-CORS_ORIGIN_ALLOW_ALL = True

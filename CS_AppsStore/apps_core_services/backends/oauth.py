@@ -18,20 +18,14 @@ class OAuth:
         if not access_token or not username:
             return None
 
-        print('in authenticate')
-        print ('username')
-
         url = '{}validate_token'.format(settings.OAUTH_SERVICE_SERVER_URL)
         auth_header_str = 'Basic {}'.format(settings.OAUTH_APP_KEY)
         response = requests.get(url, headers={'Authorization': auth_header_str},
                                 params={'provider': 'auth0',
                                         'access_token': access_token})
-        print('response: ' + response)
-        if response.status_code != status.HTTP_200_OK:
-            print('response status code NOT 200')
-            return None
 
-        print ('username: ' + username)
+        if response.status_code != status.HTTP_200_OK:
+            return None
 
         # set email field to username if not returned from auth service
         if not email:
@@ -53,13 +47,11 @@ class OAuth:
                 password=None,
             )
 
-            print ('created new user: ')
             user.is_staff = False
             user.is_active = True
             user.save()
 
         return user
-
 
     def get_user(self, user_id):
         try:
