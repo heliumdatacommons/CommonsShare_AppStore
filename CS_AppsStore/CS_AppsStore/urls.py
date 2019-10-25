@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from apps_core_services import views
 
@@ -36,3 +37,5 @@ urlpatterns += [
     url('^tycho_jupyter/', include('tycho_jupyter.urls')),
     url('^tycho_nextflow/', include('tycho_nextflow.urls')),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
