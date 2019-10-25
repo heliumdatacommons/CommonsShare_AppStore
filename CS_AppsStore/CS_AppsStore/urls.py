@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.static import serve
+from django.conf import settings
 
 from apps_core_services import views
 
@@ -38,4 +39,7 @@ urlpatterns += [
     url('^tycho_nextflow/', include('tycho_nextflow.urls')),
 ]
 
-urlpatterns += staticfiles_urlpatterns()
+
+urlpatterns += [
+        url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+]
