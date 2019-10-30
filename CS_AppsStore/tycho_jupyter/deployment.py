@@ -2,16 +2,19 @@ import os
 import yaml
 from tycho.client import TychoClient, TychoClientFactory
 import time
+import json
 
 from django.http import HttpResponseRedirect
 
 def deploy():
 
-    client_factory = TychoClientFactory()
+    #client_factory = TychoClientFactory()
     #client = client_factory.get_client()
 
-    client = TychoClient("http://35.199.30.174:8099")
+    client = TychoClient("http://34.74.182.21:8099")
 
+    print(client) 
+    
     base_dir = os.path.dirname(os.path.dirname(__file__))
     data_dir = os.path.join(base_dir, "tycho_jupyter", "data")
     spec_path = os.path.join(data_dir,  "docker-compose.yaml")
@@ -41,6 +44,8 @@ def deploy():
              }
     }
 
+    print(json.dumps(request))
+
     tycho_system = client.start(request)
     print(tycho_system)
 
@@ -48,16 +53,18 @@ def deploy():
     status = tycho_system.status
     services = tycho_system.services
 
+    print(status)
+
     if status != 'success':
         raise Exception("Error encountered while starting jupyter-datascience service: " + status)
 
     for service in services:
         name = service.name
-        if name == 'jupyter-datascienc':
+        if name == 'jupyter-datascience':
             ip_address = service.ip_address
-            port = service.port
+            port = settings_dict['HOST_PORT']
             print('ip_address: ' + ip_address)
-            print('port: ' + port)
+            print('port: ' + str(port))
 
     if ip_address == '' or ip_address == '--':
         raise Exception("ip_address is invalid: " + ip_address)
