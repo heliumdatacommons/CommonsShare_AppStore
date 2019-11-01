@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.static import serve
+from django.conf import settings
 
 from apps_core_services import views
 
@@ -35,4 +37,9 @@ urlpatterns += [
     url('^pivot_i2b2_transmart_hcm/', include('pivot_i2b2_transmart_hcm.urls')),
     url('^tycho_jupyter/', include('tycho_jupyter.urls')),
     url('^tycho_nextflow/', include('tycho_nextflow.urls')),
+]
+
+
+urlpatterns += [
+        url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]

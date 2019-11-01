@@ -23,6 +23,7 @@ class OAuth:
         response = requests.get(url, headers={'Authorization': auth_header_str},
                                 params={'provider': 'auth0',
                                         'access_token': access_token})
+
         if response.status_code != status.HTTP_200_OK:
             return None
 
@@ -45,12 +46,12 @@ class OAuth:
                 last_name=last_name,
                 password=None,
             )
+
             user.is_staff = False
             user.is_active = True
             user.save()
 
         return user
-
 
     def get_user(self, user_id):
         try:
