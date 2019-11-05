@@ -25,7 +25,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True 
 
 ALLOWED_HOSTS = []
 
@@ -40,13 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps_core_services',
-    'pivot_orchestration_service',
-    'pivot_hail',
     'phenotype',
-    'pivot_i2b2_transmart_copdgene',
-    'pivot_i2b2_transmart_hcm',
     'tycho_jupyter',
     'tycho_nextflow',
+    'cloudtop_imagej',
 ]
 
 
