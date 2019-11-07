@@ -20,7 +20,7 @@ spec:
         image: heliumdatastage/commonsshare_appstore:latest
         imagePullPolicy: Always
         command: ['/bin/bash', '-c']
-        args: ['python -m compileall -b /usr/src/inst-mgmt/ && python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --timeout 1200 --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application']
+        args: ['python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --timeout 300 --workers 2 --bind 0.0.0.0:8000 CS_AppsStore.wsgi:application']
         env:
         - name: OAUTH_SERVICE_SERVER_URL
           valueFrom:
@@ -49,11 +49,4 @@ spec:
               name: csappstore-env
         ports:
         - containerPort: 8000
-        volumeMounts:
-        - mountPath: /usr/src/inst-mgmt/static
-          name: static-volume
       restartPolicy: Always
-      volumes:
-        - name: static-volume
-          persistentVolumeClaim:
-            claimName: static-volume

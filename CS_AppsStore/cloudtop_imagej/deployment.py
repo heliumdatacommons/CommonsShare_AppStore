@@ -1,14 +1,17 @@
 import os
 import yaml
-from tycho.client import TychoClient
+from tycho.client import TychoClientFactory
 
 
 def deploy():
-
-    #client_factory = TychoClientFactory()
-    #client = client_factory.get_client()
-
-    client = TychoClient("http://34.74.182.21:8099")
+    try:
+        client_factory = TychoClientFactory()
+        client = client_factory.get_client()
+        tycho_url = client.url
+        print(f"TYCHO URL: {tycho_url}")
+    except Exception as e:
+        tycho_url = "http://localhost:5000/system"
+        print(f"TYCHO URL: {tycho_url}")
 
     base_dir = os.path.dirname(os.path.dirname(__file__))
     data_dir = os.path.join(base_dir, "cloudtop_imagej", "data")
