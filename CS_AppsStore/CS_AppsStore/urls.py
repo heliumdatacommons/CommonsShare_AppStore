@@ -34,6 +34,7 @@ urlpatterns += [
     url('^tycho_jupyter/', include('tycho_jupyter.urls')),
     url('^tycho_nextflow/', include('tycho_nextflow.urls')),
     url('^cloudtop_imagej/', include('cloudtop_imagej.urls')),
+    url(r'^list_pods/$', views.list_services, name="list_pods_services"),
 ]
 
 

@@ -1,9 +1,10 @@
 import os
 import yaml
 from tycho.client import TychoClientFactory
-
+from tycho.client import TychoApps
 
 def deploy():
+    app = "imagej"
     try:
         client_factory = TychoClientFactory()
         client = client_factory.get_client()
@@ -13,23 +14,22 @@ def deploy():
         tycho_url = "http://localhost:5000/system"
         print(f"TYCHO URL: {tycho_url}")
 
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    data_dir = os.path.join(base_dir, "cloudtop_imagej", "data")
-    spec_path = os.path.join(data_dir,  "docker-compose.yaml")
+    try:
+        tychoapps = TychoApps(app)
+    except Exception as e:
+        print(f"Exception: {e}")
 
-    print(data_dir)
+    metadata = tychoapps.getmetadata()
+
+    if 'System' in metadata.keys():
+        structure = metadata['System']
+    if 'Settings' in metadata.keys():
+        settings = metadata['Settings']
 
     """ Load settings. """
-    env_file = os.path.join(data_dir, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, 'r') as stream:
-            settings = stream.read()
-
     settings_dict = client.parse_env(settings)
 
     """ Load docker-compose file for CloudTop consisting of system spec """
-    with open(spec_path, "r") as stream:
-        structure = yaml.load(stream)
 
     request = {
             "name": "imagej",
