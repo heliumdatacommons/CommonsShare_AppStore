@@ -22,12 +22,12 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'n2mb4kf5(_%_p!raq@e58ub+mws^!a+zvn4!#a1ijm(5cob_d*'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["34.74.16.246","127.0.0.1"]
 
 
 # Application definition
@@ -53,12 +53,16 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_auth.registration',
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.jupyterhub',
-    'allauth.socialaccount.providers.openid',
-    'allauth.socialaccount.providers.orcid',
+    #'allauth.socialaccount.providers.jupyterhub',
+    #'allauth.socialaccount.providers.openid',
+    #'allauth.socialaccount.providers.orcid',
     'bootstrapform'
 ]
 
@@ -77,9 +81,43 @@ MIDDLEWARE = [
     #'oidc_provider.middleware.SessionManagementMiddleware',
 ]
 
+#django allauth configuration
+
 ACCOUNT_EMAIL_REQUIRED = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS =1
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 3
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 # 1 day in seconds
+ACCOUNT_LOGOUT_REDIRECT_URL ='/accounts/login/'
+LOGIN_REDIRECT_URL = '/accounts/email/' 
+# redirects to /accounts/profile by default
+#ACCOUNT_FORMS = {
+#'signup': 'CS_AppsStore.forms.CustomSignupForm',
+#}
+#ACCOUNT_ADAPTER = 'CS_AppsStore.adapter.RestrictEmailAdapter'
 
+#django rest-auth configuration
+
+# django-rest-auth configuration
+
+#REST_SESSION_LOGIN = False
+#OLD_PASSWORD_FIELD_ENABLED = True
+
+#REST_AUTH_SERIALIZERS = {
+  #  "TOKEN_SERIALIZER": "accounts.api.serializers.TokenSerializer",
+ #   "USER_DETAILS_SERIALIZER": "accounts.api.serializers.UserDetailSerializer",
+#}
+
+#REST_AUTH_REGISTER_SERIALIZERS = {
+#    "REGISTER_SERIALIZER": "accounts.api.serializers.CustomRegisterSerializer"
+#}
+
+#REST_FRAMEWORK = {
+#    'DEFAULT_AUTHENTICATION_CLASSES': [
+#        'rest_framework_simplejwt.authentication.JWTAuthentication',
+#    ],
+#}
 
 AUTHENTICATION_BACKENDS = (
 #    'apps_core_services.backends.oauth.OAuth',
@@ -88,6 +126,17 @@ AUTHENTICATION_BACKENDS = (
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 )
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SOCIALACCOUNT_PROVIDERS = \
+    {'google':
+        {'SCOPE': ['profile', 'email'],
+         'AUTH_PARAMS': {'access_type': 'online'}}}
 
 ROOT_URLCONF = 'CS_AppsStore.urls'
 
@@ -111,6 +160,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'CS_AppsStore.wsgi.application'
 
+TEMPLATE_CONTEXT_PROCESSORS = 'allauth.socialaccount.context_processors.socialaccount'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -166,4 +216,10 @@ SITE_URL = 'http://localhost:8000'
 
 LOGIN_REDIRECT_URL = '/login_apps/'
 
+REST_USE_JWT = True
 
+DEFAULT_AUTHENTICATION_CLASSES = [
+            'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+            'rest_framework.authentication.BasicAuthentication',
+
+    ]
