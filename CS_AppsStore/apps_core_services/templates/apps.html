@@ -14,7 +14,13 @@
       </div>	
     </div>
   </div>
-  <hr/>		
+  <hr/>
+  <div class="container manage-constainer">
+      <div class="row">
+          <input class="btn btn-success" id="manage" onclick="goManage()" type="button" value="Manage Pods">
+      </div>
+  </div>
+  <hr/>
   <div class="container apps-container">
     <div class="row">
         {% for app in apps_list %}
@@ -32,5 +38,12 @@
     </div>
   </div>
 </div>
+<script>
+    function goManage() {
+        host = window.location.origin
+        url = host + "/list_pods/"
+        window.location.href = url
+    }
+</script>
 
 {% endblock %}

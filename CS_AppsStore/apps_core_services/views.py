@@ -5,7 +5,8 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.apps import apps
 
 from apps_core_services.utils import check_authorization, authenticate_user
-
+from apps_core_services.get_pods import get_pods_services, delete_pods
+from time import sleep
 
 # Create your views here.
 
@@ -66,3 +67,23 @@ def show_apps(request):
         else:
             return HttpResponseBadRequest(
                 'Bad request - no valid access_token or user_name is provided')
+
+
+@login_required
+def list_services(request):
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        sid = request.POST.get("id")
+        print(f"ACTION: {action}, SID: {sid}")
+        if action == "delete":
+            delete_pods(request, sid)
+            sleep(15)
+            tycho_status = get_pods_services(request)
+            services = tycho_status.services
+            return render(request, "pods.html", {"services": services})
+    else:
+        tycho_status = get_pods_services(request)
+        services = tycho_status.services
+        print(f"TYCHO STATUS: {services}")
+        return render(request, "pods.html", {"services": services})
