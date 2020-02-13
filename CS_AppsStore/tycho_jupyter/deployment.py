@@ -38,6 +38,7 @@ def deploy():
             "name": "jupyter-ds",
             "env": settings_dict,
             "system": structure,
+            "user": settings_dict['REMOTE_HOST']
             "services": {
                 "jupyter-datascience": {
                 "port": settings_dict['HOST_PORT']
@@ -50,6 +51,7 @@ def deploy():
     tycho_system = client.start(request)
     print(tycho_system)
 
+    user = tycho_system.user
     guid = tycho_system.identifier
     status = tycho_system.status
     services = tycho_system.services
