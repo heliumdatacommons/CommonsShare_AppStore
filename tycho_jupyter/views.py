@@ -32,7 +32,9 @@ def start(request):
 
 @login_required
 def deploy(request):
-    print("deploying service...")
+    print ("Deploying service ...")
+    if "REMOTE_USER" in request.META:
+        request.session['REMOTE_USER'] = request.META["REMOTE_USER"]
     try:
         redirect_url = deployment.deploy()
     except Exception as ex:
