@@ -3,7 +3,11 @@ import yaml
 from tycho.client import TychoClientFactory
 
 
-def deploy():
+def deploy(request):
+    print(f'REMOTE USER: {request.META}')
+    if "REMOTE_USER" in request.META:
+        request.session['REMOTE_USER'] = request.META["REMOTE_USER"]
+        print(f"REMOTE USER: {request.META['REMOTE_USER']}")
     try:
         client_factory = TychoClientFactory()
         client = client_factory.get_client()
@@ -33,6 +37,7 @@ def deploy():
 
     request = {
             "name": "imagej",
+            "REMOTE_USER": request.META["REMOTE_USER"],
             "env": settings_dict,
             "system": structure,
             "services": {
