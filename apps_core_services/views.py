@@ -1,13 +1,43 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponse
 from django.apps import apps
 
 from apps_core_services.utils import check_authorization, authenticate_user
 
+from apps_core_services.get_pods import get_pods_services, delete_pods
+from time import sleep
 
-# Create your views here.
+from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from rest_auth.registration.views import SocialLoginView
+
+class GithubLogin(SocialLoginView):
+    adapter_class = GitHubOAuth2Adapter
+    #callback_url = "http://34.74.177.120/accounts/github/login/callback/"
+    callback_url = "http://127.0.0.1:8000/accounts/github/login/callback/"
+    #callback_url = "http://10.0.1.176/accounts/github/login/callback/"
+    client_class = OAuth2Client
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    client_class = OAuth2Client
+    callback_url = "http://127.0.0.1:8000/accounts/google/login/callback/"
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+
+class AppsStore_JWT(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Testing AppsStore JWT Token Creation!'}
+        return Response(content)
+
 
 
 def home_page_view(request):
@@ -27,28 +57,70 @@ def signout_view(request):
     return redirect('/')
 
 
+
+def get_svc_data():
+    tycho_status = get_pods_services(request)
+    services = tycho_status.services
+    print(f"TYCHO STATUS: {services}")
+
+    svcs_list = []
+    path_prefix = "/static/images/"
+    path_suffix = "-logo.png"
+    for service in services:
+        name = service.name.split("-")[0]
+        lname = name.capitalize()
+        logo_name = f'{lname} Logo'
+        logo_path = f'{path_prefix}{name}{path_suffix}'
+        ip_address = service.ip_address
+        if(ip_address == 'x'):
+            ip_address = '--'
+        port = ''
+        port = service.port
+        if port == '':
+            port = '--'
+        creation_time =  service.creation_time
+
+        print("APP VALUES:")
+        print(f"NAME: {name}")
+        print(f"LNAME: {lname}")
+        print(f"LOGO_NAME: {logo_name}")
+        print(f"LOGO_PATH: {logo_path}")
+        print(f"IP_ADDRESS: {ip_address}")
+        print(f"PORT: {port}")
+        print(f"CREATION_TIME: {creation_time}")
+        print(" ")
+
+        svcs_list.append({'name': name,
+                          'lname': lname,
+                          'logo_name': logo_name,
+                          'logo_path':logo_path,
+                          'ip_address': ip_address,
+                          'port': port,
+                          'creation_time': creation_time})
+
+    return {"services": svcs_list}
+
+
+
+
+
 @login_required
 def login_show_apps(request):
-    apps_list = []
+    print(f"~~~~~REQUEST: {request.GET}, {request.META}")
+    try:
+       print(f"REQUEST USER: {request.user.username}, {request.user.email}")
+       request.META['REMOTE_USER'] = request.user.username
+    except Exception as e:
+       pass
 
-    for app_conf in apps.get_app_configs():
-        try:
-            url = app_conf.url
-            logo = app_conf.logo
-        except AttributeError:
-            continue
-
-        apps_list.append({'verbose_name': app_conf.verbose_name,
-                          'url': url,
-                          'logo': logo})
-
-    return render(request, "apps.html", {'apps_list': apps_list})
+    return render(request, "apps_pods.html", get_svc_data())
 
 
 def show_apps(request):
     token = request.GET.get('access_token', None)
     uname = request.GET.get('user_name', None)
     uemail = request.GET.get('email', None)
+
 
     if not token or not uname:
         auth_resp = check_authorization(request)
@@ -66,3 +138,35 @@ def show_apps(request):
         else:
             return HttpResponseBadRequest(
                 'Bad request - no valid access_token or user_name is provided')
+
+@login_required
+def list_services(request):
+
+    # list_pods url comes here . . .                             
+    if request.method == "POST":
+        action = request.POST.get("action")
+        sid = request.POST.get("id")
+        print(f"ACTION: {action}, SID: {sid}")
+        if action == "delete":
+            delete_pods(request, sid)
+            sleep(15)
+            return render(request, "apps_pods.html", get_svc_data())
+    else:
+        return render(request, "apps_pods.html", get_svc_data())
+
+
+def auth(request):
+    if request.user:
+        try:
+            response = HttpResponse(content_type="application/json", status=200)
+            response["REMOTE_USER"] = request.user
+            print(f"{response['REMOTE_USER']}")
+        except Exception as e:
+            response = HttpResponse(content_type="application/json", status=403)
+            response["REMOTE_USER"] = request.user
+    else:
+        response = HttpResponse(content_type="application/json", status=403)
+        response["REMOTE_USER"] = request.user
+
+    return response
+

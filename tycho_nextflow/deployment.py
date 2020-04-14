@@ -1,13 +1,19 @@
 import os
 import yaml
 from tycho.client import TychoClientFactory
-import time
-
-from django.http import HttpResponseRedirect
+from tycho.client import TychoApps
+#import time
+import json
+#from django.http import HttpResponseRedirect
 
 def deploy():
+    printf("Enter cloudtop_imagej/deployment.py::deploy(request)")
+    if "HTTP_REFERER" in request.META:
+        url_referer = request.META["HTTP_REFERER"]
+        system_url = url_referer.split("/")[2]
+        print(f"SYSTEM URL from Http_Referer: {system_url}")
 
-    try:
+   try:
         client_factory = TychoClientFactory()
         client = client_factory.get_client()
         tycho_url = client.url
@@ -16,28 +22,32 @@ def deploy():
         tycho_url = "http://localhost:5000/system"
         print(f"TYCHO URL: {tycho_url}")
 
-    client = TychoClient("172.25.16.132:8099")
+    try:
+        app = "nextflow"
+        tychoapps = TychoApps(app)
+    except Exception as e:
+        print(f"Exception: {e}")
 
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    data_dir = os.path.join(base_dir, "tycho_nextflow", "data")
-    spec_path = os.path.join(data_dir,  "docker-compose.yaml")
+    metadata = tychoapps.getmetadata()
 
-    print(data_dir)
+    if 'System' in metadata.keys():
+        structure = metadata['System']
+        print(f"Structure: {structure}")
+    if 'Settings' in metadata.keys():
+        settings = metadata['Settings']
+        print(f"Settings: {settings}")
 
     """ Load settings. """
-    env_file = os.path.join(data_dir, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, 'r') as stream:
-            settings = stream.read()
-
     settings_dict = client.parse_env(settings)
+    print(f"Settings Dict: {settings_dict}")
 
-    """ Load docker-compose file consisting of system spec """
-    with open(spec_path, "r") as stream:
-        structure = yaml.load(stream)
+    username = request.META["REMOTE_USER"]
+
+    print(f"Settings Dict: {settings_dict}")
 
     request = {
             "name": "nextflow",
+            "username": request.META["REMOTE_USER"],
             "env": settings_dict,
             "system": structure,
             "services": {
@@ -47,18 +57,27 @@ def deploy():
              }
     }
 
-    print(request)
+    print(json.dumps(request))
     tycho_system = client.start(request)
+
+    print(f"TYCHO SYSTEM: {tycho_system.name}, {tycho_system.identifier}")
+    system_name = tycho_system.name.split("-")[0]
+    identifier = tycho_system.identifier
+    print(f"LOCAL SYSTEM_NAME: {system_name}")
+    print(f"LOCAL SYSTEM IDENTIFIER: {identifier}")
 
     guid = tycho_system.identifier
     status = tycho_system.status
     services = tycho_system.services
 
+    print(f"Service Nextflow: {services}")
+    print(f"Status: {status}")
     if status != 'success':
         raise Exception("Error encountered while starting jupyter-datascience service: " + status)
 
     for service in services:
         name = service.name
+        print(f"SERVICE NAME: {name}")
         if name == 'nextflow':
             ip_address = service.ip_address
             port = service.port
@@ -73,6 +92,8 @@ def deploy():
     if port == '' or port == '--':
         raise Exception("port is invalid: " + port)
 
-    redirect_url = 'http://' + ip_address + ':' + str(port)
+
+    redirect_url = f"http://{system_url}/private/{system_name}/{username}/{identifier}/"
     print('redirecting to ' + redirect_url)
+    print("Exiting cloudtop_imagej/deployment.py::deploy(request)")
     return redirect_url

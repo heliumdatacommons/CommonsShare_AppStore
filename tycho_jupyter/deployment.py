@@ -1,12 +1,18 @@
 import os
 import yaml
 from tycho.client import TychoClientFactory
-import time
+from tycho.client import TychoApps
+#import time
 import json
 
-from django.http import HttpResponseRedirect
+#from django.http import HttpResponseRedirect
 
 def deploy():
+    if "HTTP_REFERER" in request.META:
+        url_referer = request.META["HTTP_REFERER"]
+        system_url = url_referer.split("/")[2]
+        print(f"SYSTEM URL from Http_Referer: {system_url}")
+
     try:
         client_factory = TychoClientFactory()
         client = client_factory.get_client()
@@ -16,56 +22,68 @@ def deploy():
         tycho_url = "http://localhost:5000/system"
         print(f"TYCHO URL: {tycho_url}")
 
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    data_dir = os.path.join(base_dir, "tycho_jupyter", "data")
-    spec_path = os.path.join(data_dir,  "docker-compose.yaml")
+    try:
+        app = "jupyter-ds"
+        tychoapps = TychoApps(app)
+    except Exception as e:
+        print(f"Exception: {e}")
 
-    print(data_dir)
+    metadata = tychoapps.getmetadata()
+
+    if 'System' in metadata.keys():
+        structure = metadata['System']
+        print(f"Structure: {structure}")
+    if 'Settings' in metadata.keys():
+        settings = metadata['Settings']
+        print(f"Settings: {settings}")
 
     """ Load settings. """
-    env_file = os.path.join(data_dir, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, 'r') as stream:
-            settings = stream.read()
-
     settings_dict = client.parse_env(settings)
+    print(f"Settings Dict: {settings_dict}")
 
-    """ Load docker-compose file consisting of system spec """
-    with open(spec_path, "r") as stream:
-        structure = yaml.load(stream)
+    username = request.META["REMOTE_USER"]
 
     request = {
-            "name": "jupyter-datascience",
+            "name": "jupyter-ds",
+            "username": request.META["REMOTE_USER"],
             "env": settings_dict,
             "system": structure,
             "services": {
-                "jupyter-datascience": {
+                "jupyter-ds": {
                 "port": settings_dict['HOST_PORT']
                 }
              }
     }
 
+    print("Sending this request to tycho client to start imagej app:")
     print(json.dumps(request))
-
     tycho_system = client.start(request)
-    print(tycho_system)
+
+    print(f"TYCHO SYSTEM: {tycho_system.name}, {tycho_system.identifier}")
+    system_name = tycho_system.name.split("-")[0]
+    identifier = tycho_system.identifier
+    print(f"LOCAL SYSTEM_NAME: {system_name}")
+    print(f"LOCAL SYSTEM IDENTIFIER: {identifier}")
 
     guid = tycho_system.identifier
     status = tycho_system.status
     services = tycho_system.services
 
-    print(status)
-
+    print(f"Service Jupyter: {services}")
+    print(f"Status: {status}")
     if status != 'success':
         raise Exception("Error encountered while starting jupyter-datascience service: " + status)
 
     for service in services:
         name = service.name
-        if name == 'jupyter-datascience':
+        print(f"SERVICE NAME: {name}")
+        if name == 'jupyter-ds':
             ip_address = service.ip_address
+            port = service.port
             port = settings_dict['HOST_PORT']
             print('ip_address: ' + ip_address)
             print('port: ' + str(port))
+            break
 
     if ip_address == '' or ip_address == '--':
         raise Exception("ip_address is invalid: " + ip_address)
@@ -73,6 +91,6 @@ def deploy():
     if port == '' or port == '--':
         raise Exception("port is invalid: " + port)
 
-    redirect_url = 'http://' + ip_address + ':' + str(port)
+    redirect_url = f"http://{system_url}/private/{system_name}/{username}/{identifier}/"
     print('redirecting to ' + redirect_url)
     return redirect_url

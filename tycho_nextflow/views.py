@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
     HTTP_400_BAD_REQUEST
+from time import sleep
 import json
 
 from tycho_nextflow import deployment
@@ -35,10 +36,15 @@ def start(request):
 @login_required
 def deploy(request):
     print("deploying service...")
+
+    request.META['REMOTE_USER'] = request.user.username
+    print(f"REQUEST META: {request.META}")
+
     try:
-        redirect_url = deployment.deploy()
+        redirect_url = deployment.deploy(request)
     except Exception as ex:
         return JsonResponse(data={'invalid ip_address or port from nextflow deployment ': ex},
                             status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+    sleep(20)
     return redirect_url

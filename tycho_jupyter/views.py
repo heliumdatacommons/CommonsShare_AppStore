@@ -33,8 +33,12 @@ def start(request):
 @login_required
 def deploy(request):
     print("deploying service...")
+
+    request.META['REMOTE_USER'] = request.user.username
+    print(f"REQUEST META: {request.META}")
+
     try:
-        redirect_url = deployment.deploy()
+        redirect_url = deployment.deploy(request)
     except Exception as ex:
         return JsonResponse(data={'invalid ip_address or port from jupyter-datasacience deployment ': ex},
                             status=HTTP_500_INTERNAL_SERVER_ERROR)

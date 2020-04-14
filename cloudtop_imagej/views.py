@@ -13,6 +13,7 @@ from cloudtop_imagej import deployment
 def login_start(request):
     # view function when the start action is triggered from CommonsShare Apps Store from
     # which the user has already logged in to CommonsShare Apps Store directly
+    print("ENTERING cloudtop_imagej/views.py::login_start(request)")
     redirect_url = deploy(request)
     messages.success(request, 'Launching CloudTop/ImageJ')
     return HttpResponseRedirect(redirect_url)
@@ -31,11 +32,19 @@ def start(request):
 
 @login_required
 def deploy(request):
+    print("Entering cloudtop_imagej/views.py::deploy(request)")
     print("deploying service...")
+
+    print(f"USERNAME: {request.user.username}")
+    request.META['REMOTE_USER'] = request.user.username
+    print(f"REQUEST META: {request.META}")
+    request.session['REMOTE_USER'] = request.user.username
+
     try:
-        redirect_url = deployment.deploy()
+        redirect_url = deployment.deploy(request)
     except Exception as ex:
         return JsonResponse(data={'invalid ip_address or port from imagej deployment ': ex},
                             status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+    print("Exiting cloudtop_imagej/views.py::deploy(request)")
     return redirect_url
