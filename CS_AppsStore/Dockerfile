@@ -16,11 +16,11 @@ RUN apt-get install -y postgresql-client
 RUN pip install --upgrade pip
 RUN pip install virtualenv
 COPY ./requirements.txt /usr/src/inst-mgmt/requirements.txt
-COPY ./tycho_api-5.0.2-py3-none-any.whl /usr/src/inst-mgmt/tycho_api-5.0.2-py3-none-any.whl
+#COPY ./tycho_api-5.0.2-py3-none-any.whl /usr/src/inst-mgmt/tycho_api-5.0.2-py3-none-any.whl
 RUN virtualenv /usr/src/inst-mgmt/python_allauth
 RUN /bin/bash -c "source /usr/src/inst-mgmt/python_allauth/bin/activate"
 RUN pip install -r /usr/src/inst-mgmt/requirements.txt
-RUN pip install /usr/src/inst-mgmt/tycho_api-5.0.2-py3-none-any.whl
+#RUN pip install /usr/src/inst-mgmt/tycho_api-5.0.2-py3-none-any.whl
 RUN pip install pyyaml
 RUN pip install netifaces 
 RUN pip install jinja2 
@@ -28,8 +28,6 @@ RUN pip install kubernetes
 RUN pip install requests
 
 # Added from Murali's Dockerfile:
-RUN mkdir /usr/local/lib/python3.7/site-packages/django/contrib/admin/templates/accounts
-COPY ./login.html /usr/local/lib/python3.7/site-packages/django/contrib/admin/templates/accounts/
 EXPOSE 8000
 EXPOSE 5432
 COPY . /usr/src/inst-mgmt

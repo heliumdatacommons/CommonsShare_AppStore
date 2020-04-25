@@ -1,7 +1,7 @@
 import os
 import yaml
-from tycho.client import TychoClientFactory
-from tycho.client import TychoApps
+from client import TychoClientFactory
+from client import TychoApps
 import json
 
 def deploy(request):
@@ -81,11 +81,13 @@ def deploy(request):
             break
 
     if ip_address == '' or ip_address == '--':
-        raise Exception("imagej ip_address is invalid: " + ip_address)
+        redirect_url = f"http://{system_url}/private/{system_name}/{username}/{identifier}/"
+    else:
+        redirect_url = 'http://' + ip_address + ':' + str(port)
 
     if port == '' or port == '--':
         raise Exception("imagej port is invalid: " + port)
 
-    redirect_url = f"http://{system_url}/private/{system_name}/{username}/{identifier}/"
+    #redirect_url = f"http://{system_url}/private/{system_name}/{username}/{identifier}/"
     print('redirecting to ' + redirect_url)
     return redirect_url

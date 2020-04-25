@@ -1,4 +1,4 @@
-from tycho.client import TychoClientFactory
+from client import TychoClientFactory
 import requests
 
 
