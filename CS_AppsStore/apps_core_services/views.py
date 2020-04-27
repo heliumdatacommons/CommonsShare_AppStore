@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponse
 from django.apps import apps
 import json
@@ -54,7 +55,7 @@ def signout_view(request):
     #del  request.GET['token']
     #del request.GET['session_id']
     #logout(request)
-    return redirect('/')
+    return redirect('/accounts/logout/')
 
 
 @login_required
@@ -115,8 +116,19 @@ def login_show_apps(request):
                           'identifier': identifier,
                           'creation_time': creation_time})
 
-    return render(request, "apps_pods.html", {"svcs_list": svcs_list})
+    # Get main logo url and alt vars
+    fnames = {"braini": "braini-lg-gray.png",
+              "scidas": "scidas-logo-sm.png",
+              "catalyst": "bdc-logo.svg",
+              "commonsshare": "logo-lg.png"}
 
+    brand = settings.APPLICATION_BRAND
+    print(f"BRAND: {brand}")
+    logo_prefix = "/static/images/" + brand + "/"
+    logo_url = logo_prefix + fnames[brand]
+    print(f"LOGO_URL: {logo_url}")
+    logo_alt = brand + " image"
+    return render(request, "apps_pods.html", {"brand": brand, "logo_url": logo_url, "logo_alt": logo_alt, "svcs_list": svcs_list})
 
 
 def show_apps(request):
@@ -154,74 +166,9 @@ def list_services(request):
         if action == "delete":
             delete_pods(request, sid)
             sleep(2)
-            tycho_status = get_pods_services(request)
-            services = tycho_status.services
-
-            svcs_list = []
-            print("Listing services")
-            for service in services:
-                full_name = service.name
-                print(f"Found service: {full_name}")
-                name = service.name.split("-")[0]
-                lname = name.capitalize()
-                logo_name = f'{lname} Logo'
-                logo_path = f'{path_prefix}{name}{path_suffix}'
-                ip_address = service.ip_address
-                if(ip_address == 'x'):
-                    ip_address = '--'
-                port = ''
-                port = service.port
-                #port = settings_dict['HOST_PORT']
-                if port == '':
-                    port = '--'
-                identifier = service.identifier
-                creation_time = service.creation_time
-
-                svcs_list.append({'full_name': full_name,
-                                  'name': name,
-                                  'lname': lname,
-                                  'logo_name': logo_name,
-                                  'logo_path': logo_path,
-                                  'ip_address': ip_address,
-                                  'port': port,
-                                  'identifier': identifier,
-                                  'creation_time': creation_time})
-
-            return render(request, "apps_pods.html", {"svcs_list": svcs_list})
+            return HttpResponseRedirect("/login_apps/")
     else:
-        print("Listing services")
-        svcs_list = []
-        tycho_status = get_pods_services(request)
-        services = tycho_status.services
-        for service in services:
-            full_name = service.name
-            print(f"Found service: {full_name}")
-            name = service.name.split("-")[0]
-            lname = name.capitalize()
-            logo_name = f'{lname} Logo'
-            logo_path = f'{path_prefix}{name}{path_suffix}'
-            ip_address = service.ip_address
-            if(ip_address == 'x'):
-                ip_address = '--'
-            port = ''
-            port = service.port
-            #port = settings_dict['HOST_PORT']
-            if port == '':
-                port = '--'
-            identifier = service.identifier
-            creation_time = service.creation_time
-
-            svcs_list.append({'full_name': full_name,
-                              'name': name,
-                              'lname': lname,
-                              'logo_name': logo_name,
-                              'logo_path': logo_path,
-                              'ip_address': ip_address,
-                              'port': port,
-                              'identifier': identifier,
-                              'creation_time': creation_time})
-
-        return render(request, "apps_pods.html", {"svcs_list": svcs_list})
+        return HttpResponseRedirect("/login_apps/")
 
 
 def auth(request):

@@ -27,7 +27,8 @@ RUN pip install jinja2
 RUN pip install kubernetes
 RUN pip install requests
 
-# Added from Murali's Dockerfile:
+<<<<<<< HEAD
+>>>>>>> new-ui-change
 EXPOSE 8000
 EXPOSE 5432
 COPY . /usr/src/inst-mgmt
