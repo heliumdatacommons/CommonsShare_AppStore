@@ -27,8 +27,7 @@ RUN pip install jinja2
 RUN pip install kubernetes
 RUN pip install requests
 
-<<<<<<< HEAD
->>>>>>> new-ui-change
+
 EXPOSE 8000
 EXPOSE 5432
 COPY . /usr/src/inst-mgmt
