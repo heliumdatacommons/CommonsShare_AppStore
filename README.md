@@ -1,3 +1,5 @@
+*****This repository is obsolete.  Please use the repository located at  http://github.com/helxplatform/appstore for any future development related to AppStore.***** 
+
 # CommonsShare_AppStore
 
 To run locally, follow the steps:
